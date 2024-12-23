@@ -1,5 +1,12 @@
 <?php
-function format(float $amount) {
+
+/**
+ * Форматирует цену лота
+ * @param int|float $price
+ * @return string
+ */
+
+function formatPrice(float $amount): string {
     $amount = ceil($amount);
 
     if ($amount >= 1000) {
@@ -11,7 +18,13 @@ function format(float $amount) {
     return $formattedAmount . ' ₽';
 }
 
-function getTimeRemaining(string $expiringDate) {
+/**
+ * Подсчитывает время до окончания показа лота
+ * @param string $date
+ * @return array
+ */
+
+function getTimeRemaining(string $expiringDate): array {
     $timeDifference = strtotime($expiringDate) - time();
 
     if ($timeDifference <= 0) {
