@@ -24,15 +24,21 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Структура таблицы `bet`
+-- Структура таблицы `bets`
 --
 
-CREATE TABLE `bet` (
-  `id` int NOT NULL,
-  `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
-  `summ` decimal(10,2) NOT NULL,
-  `user_id` int NOT NULL,
-  `lot_id` int NOT NULL
+CREATE DATABASE yeticave
+  DEFAULT CHARACTER SET utf8mb4
+  DEFAULT COLLATE utf8mb4_general_ci;
+
+USE yeticave;
+
+CREATE TABLE `bets` (
+  `id` int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `amount` int UNSIGNED NOT NULL,
+  `user_id` int UNSIGNED NOT NULL,
+  `lot_id` int UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -42,9 +48,9 @@ CREATE TABLE `bet` (
 --
 
 CREATE TABLE `categories` (
-  `id` int NOT NULL,
-  `title` varchar(100) NOT NULL,
-  `symbol_code` varchar(50) NOT NULL
+  `id` int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `designation` varchar(100) NOT NULL UNIQUE,
+  `symbol_code` varchar(50) NOT NULL UNIQUE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -53,18 +59,18 @@ CREATE TABLE `categories` (
 -- Структура таблицы `lot`
 --
 
-CREATE TABLE `lot` (
-  `id` int NOT NULL,
+CREATE TABLE `lots` (
+  `id` int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `date_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `description` text NOT NULL,
-  `img` varchar(255) NOT NULL,
-  `initial_price` decimal(10,2) DEFAULT NULL,
-  `date_end` datetime DEFAULT NULL,
-  `bet_step` decimal(10,2) DEFAULT NULL,
+  `description` text,
   `title` varchar(255) NOT NULL,
-  `author_id` int NOT NULL,
-  `winner_id` int NOT NULL,
-  `category_id` int NOT NULL
+  `img` varchar(255),
+  `date_end` datetime NOT NULL,
+  `initial_price` int UNSIGNED NOT NULL,
+  `bet_step` int UNSIGNED NOT NULL,
+  `author_id` int UNSIGNED NOT NULL,
+  `winner_id` int UNSIGNED NOT NULL,
+  `category_id` int UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -73,15 +79,13 @@ CREATE TABLE `lot` (
 -- Структура таблицы `user`
 --
 
-CREATE TABLE `user` (
-  `id` int NOT NULL,
+CREATE TABLE `users` (
+  `id` int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `sign_up_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `email` varchar(100) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `password` varchar(100) NOT NULL,
-  `contacts` text,
-  `created_lots_id` int NOT NULL,
-  `bets_id` int NOT NULL
+  `email` varchar(60) NOT NULL,
+  `name` varchar(60) NOT NULL,
+  `password` varchar(60) NOT NULL,
+  `contacts` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -91,7 +95,7 @@ CREATE TABLE `user` (
 --
 -- Индексы таблицы `bet`
 --
-ALTER TABLE `bet`
+ALTER TABLE `bets`
   ADD PRIMARY KEY (`id`),
   ADD KEY `lot_id` (`lot_id`),
   ADD KEY `user_id` (`user_id`);
@@ -106,7 +110,7 @@ ALTER TABLE `categories`
 --
 -- Индексы таблицы `lot`
 --
-ALTER TABLE `lot`
+ALTER TABLE `lots`
   ADD PRIMARY KEY (`id`),
   ADD KEY `lot_ibfk_1` (`author_id`),
   ADD KEY `winner_id` (`winner_id`),
@@ -115,39 +119,11 @@ ALTER TABLE `lot`
 --
 -- Индексы таблицы `user`
 --
-ALTER TABLE `user`
+ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
   ADD KEY `bets_id` (`bets_id`),
   ADD KEY `created_lots_id` (`created_lots_id`);
-
---
--- AUTO_INCREMENT для сохранённых таблиц
---
-
---
--- AUTO_INCREMENT для таблицы `bet`
---
-ALTER TABLE `bet`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT для таблицы `categories`
---
-ALTER TABLE `categories`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT для таблицы `lot`
---
-ALTER TABLE `lot`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT для таблицы `user`
---
-ALTER TABLE `user`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- Ограничения внешнего ключа сохраненных таблиц
@@ -156,24 +132,24 @@ ALTER TABLE `user`
 --
 -- Ограничения внешнего ключа таблицы `bet`
 --
-ALTER TABLE `bet`
-  ADD CONSTRAINT `bet_ibfk_1` FOREIGN KEY (`lot_id`) REFERENCES `lot` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `bet_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+ALTER TABLE `bets`
+  ADD CONSTRAINT `bets_ibfk_1` FOREIGN KEY (`lot_id`) REFERENCES `lot` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `bets_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Ограничения внешнего ключа таблицы `lot`
 --
-ALTER TABLE `lot`
-  ADD CONSTRAINT `lot_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
-  ADD CONSTRAINT `lot_ibfk_4` FOREIGN KEY (`winner_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `lot_ibfk_5` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+ALTER TABLE `lots`
+  ADD CONSTRAINT `lots_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  ADD CONSTRAINT `lots_ibfk_4` FOREIGN KEY (`winner_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `lots_ibfk_5` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Ограничения внешнего ключа таблицы `user`
 --
-ALTER TABLE `user`
-  ADD CONSTRAINT `user_ibfk_1` FOREIGN KEY (`bets_id`) REFERENCES `bet` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `user_ibfk_2` FOREIGN KEY (`created_lots_id`) REFERENCES `lot` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+ALTER TABLE `users`
+  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`bets_id`) REFERENCES `bet` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `users_ibfk_2` FOREIGN KEY (`created_lots_id`) REFERENCES `lot` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
