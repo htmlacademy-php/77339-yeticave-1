@@ -29,11 +29,17 @@
                 <div class="lot__state">
                     <div class="lot__rate">
                         <span class="lot__amount">Стартовая цена</span>
-                        <span class="lot__cost"><?php echo format(htmlspecialchars($lot['price']));?></span>
+                        <span class="lot__cost"><?php echo formatPrice(htmlspecialchars($lot['price']));?></span>
                     </div>
-                    <div class="lot__timer timer">
-                        12:23
+                    <?php
+                    list($hours, $minutes) = getTimeRemaining($lot['expires']);
+                    $time = sprintf('%02d:%02d', $hours, $minutes);
+                    $finishing = ($hours < 1) ? "timer--finishing" : '';
+                    ?>
+                    <div class="lot__timer timer <?= $finishing; ?>">
+                        <?=$time;?>
                     </div>
+
                 </div>
             </div>
         </li>
