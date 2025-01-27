@@ -3,7 +3,7 @@ require_once 'data.php';
 
 $lots = getLots($db);
 $categories = getCategories($db);
-
+  
 $content = include_template('main.php', [
 	'categories' => $categories,
 	'lots' => $lots

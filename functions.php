@@ -129,5 +129,3 @@ function getLotById(mysqli $con, int $id): array|false|null
 
     return mysqli_fetch_assoc($result);
 }
-
-?>
