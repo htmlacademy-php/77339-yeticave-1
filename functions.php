@@ -1,7 +1,11 @@
 <?php
 
 /**
+<<<<<<< Updated upstream
  * Форматирует цену лота
+=======
+ * форматирует цену лота
+>>>>>>> Stashed changes
  * @param int|float $price
  * @return string
  */
@@ -20,7 +24,11 @@ function formatPrice(float $amount): string
 }
 
 /**
+<<<<<<< Updated upstream
  * Подсчитывает время до окончания показа лота
+=======
+ * подсчитывает время до окончания показа лота
+>>>>>>> Stashed changes
  * @param string $date
  * @return array
  */
@@ -39,16 +47,41 @@ function getTimeRemaining(string $expiringDate): array
     return [$hours, $minutes];
 }
 
+<<<<<<< Updated upstream
+=======
+/**
+ * установка соединения с базой данных
+ * @param array $config настройки подключения
+ * @return mysqli|bool ресурс соединения
+ */
+
+>>>>>>> Stashed changes
 function connectDd(array $config): mysqli|bool
 {
     $dbConfig = $config['db'];
     $con = mysqli_connect($dbConfig['host'], $dbConfig['user'], $dbConfig['password'], $dbConfig['database']);
 
+<<<<<<< Updated upstream
+=======
+    if ($con === false) {
+        exit("Ошибка подключения: " . mysqli_connect_error());
+    }
+
+>>>>>>> Stashed changes
     mysqli_set_charset($con, 'utf8');
 
     return $con;
 }
 
+<<<<<<< Updated upstream
+=======
+/**
+ * получение массива самых новых актуальных лотов из базы данных
+ * @param mysqli $con
+ * @return array
+ */
+
+>>>>>>> Stashed changes
 function getLots(mysqli $con): array
 {
     $sql = 'SELECT l.id, l.title, l.initial_price, l.img, c.designation, b.amount
@@ -69,6 +102,15 @@ function getLots(mysqli $con): array
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
+<<<<<<< Updated upstream
+=======
+/**
+ * получение списка категорий
+ * @param mysqli $con
+ * @return array
+ */
+
+>>>>>>> Stashed changes
 function getCategories(mysqli $con): array
 {
     $sql = 'SELECT * FROM categories;';
@@ -83,6 +125,16 @@ function getCategories(mysqli $con): array
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
+<<<<<<< Updated upstream
+=======
+/**
+ * подключает шаблон, передает туда данные и возвращает итоговый HTML контент
+ * @param string $name путь к файлу шаблона относительно папки templates
+ * @param array $data ассоциативный массив с данными для шаблона
+ * @return string итоговый HTML
+ */
+
+>>>>>>> Stashed changes
 function include_template($name, array $data = []) {
     $name = 'templates/' . $name;
     $result = '';
@@ -100,6 +152,7 @@ function include_template($name, array $data = []) {
     return $result;
 }
 
+<<<<<<< Updated upstream
 function getLotById(mysqli $con, int $id): array|false|null
 {
     if ($id < 0 || $id == null || $id == '') {
@@ -108,6 +161,17 @@ function getLotById(mysqli $con, int $id): array|false|null
         return [];
     }
 
+=======
+/**
+ * получение лота по id
+ * @param mysqli $con
+ * @param int $id
+ * @return array|false|null
+ */
+
+function getLotById(mysqli $con, int $id): array|false|null
+{}
+>>>>>>> Stashed changes
     $sql = "SELECT  l.*,
                     c.name AS category,
                     r.amount AS last_rate,
@@ -129,3 +193,18 @@ function getLotById(mysqli $con, int $id): array|false|null
 
     return mysqli_fetch_assoc($result);
 }
+<<<<<<< Updated upstream
+=======
+
+/**
+ * показывает страницу с ошибками
+ * @param $content
+ * @param $error
+ * @return void
+ */
+
+function error(&$content, $error)
+{
+    $content = includeTemplate('error.php', ['error' => $error]);
+}
+>>>>>>> Stashed changes

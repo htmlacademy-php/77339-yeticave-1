@@ -3,7 +3,11 @@ require_once 'data.php';
 
 $lots = getLots($db);
 $categories = getCategories($db);
+<<<<<<< Updated upstream
   
+=======
+
+>>>>>>> Stashed changes
 $content = include_template('main.php', [
 	'categories' => $categories,
 	'lots' => $lots
