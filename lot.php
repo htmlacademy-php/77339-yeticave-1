@@ -5,7 +5,11 @@ $categories = getCategories($dbConnection);
 
 $lotId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
+<<<<<<< Updated upstream
 if ($lotId === null || $lotId === false || $lotId === '') {
+=======
+if (is_int($lotId) === false) {
+>>>>>>> Stashed changes
     http_response_code(404);
     $content = include_template('404.php', [
         'categories' => $categories
