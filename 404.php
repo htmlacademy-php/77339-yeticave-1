@@ -1,14 +1,17 @@
 <?php
 require_once 'data.php';
 
+http_response_code(404);
+
 $categories = getCategories($db);
 
-$lotId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-$lot = getLotById($db, $lotId);
+$pageContent = includeTemplate('404.php', [
+    'categories' => $categories,
+]);
 
 $layoutContent = includeTemplate('layout.php', [
-    'content' => $content,
-    'title' => $lotTitle,
+    'content' => $pageContent,
+    'title' => "404 Страница не найдена",
     'isAuth' => $isAuth,
     'userName' => $userName,
     'categories' => $categories,
