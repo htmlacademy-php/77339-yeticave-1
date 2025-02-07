@@ -1,12 +1,9 @@
 <?php
-
-return =  [
+return [
     'db' => [
-        'host' => 'admin',
+        'host' => 'localhost',
         'user' => 'root',
         'password' => 'root',
-        'database' => 'yeticave'
-    ]
-]
-
-?>
+        'database' => 'yeticave',
+    ],
+];

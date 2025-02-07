@@ -1,5 +1,10 @@
 <?php
+
 require_once 'data.php';
+
+/** @var int $isAuth */
+/** @var string $userName */
+/** @var mysqli $db */
 
 http_response_code(404);
 
@@ -11,7 +16,7 @@ $pageContent = includeTemplate('404.php', [
 
 $layoutContent = includeTemplate('layout.php', [
     'content' => $pageContent,
-    'title' => "404 Страница не найдена",
+    'title' => "Страница не найдена",
     'isAuth' => $isAuth,
     'userName' => $userName,
     'categories' => $categories,

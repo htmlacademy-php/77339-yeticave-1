@@ -1,17 +1,19 @@
 <?php
 /** @var array $categories */
 /** @var array|null $lot Данные лота */
-$timeRemaining = getTimeRemaining($lot["ended_at"]);
-$hours = $timeRemaining[0];
-$minutes = $timeRemaining[1];
+/** @var int $isAuth */
+
+$remainingTime = getTimeRemaining($lot["date_end"]);
+$hours = $remainingTime[0];
+$minutes = $remainingTime[1];
 $class = ($hours < 1) ? 'timer--finishing' : '';
 
 if ($lot['last_rate'] !== null) {
     $currentPrice = $lot['last_rate'];
-    $minBid = $lot['last_rate'] + $lot['rate_step'];
+    $minBid = $lot['last_rate'] + $lot['bet_step'];
 } else {
-    $currentPrice = $lot['start_price'];
-    $minBid = $lot['start_price'] + $lot['rate_step'];
+    $currentPrice = $lot['initial_price'];
+    $minBid = $lot['initial_price'] + $lot['bet_step'];
 }
 ?>
 
@@ -20,12 +22,13 @@ if ($lot['last_rate'] !== null) {
     <div class="lot-item__content">
         <div class="lot-item__left">
             <div class="lot-item__image">
-                <img src="<?= htmlspecialchars($lot['image_url']) ?>" width="730" height="548" alt="Сноуборд">
+                <img src="<?= htmlspecialchars($lot['img']) ?>" width="730" height="548" alt="Сноуборд">
             </div>
             <p class="lot-item__category"> Категория: <span><?= $lot['category'] ?></span></p>
             <p class="lot-item__description"><?= htmlspecialchars($lot['description'])?></p>
         </div>
         <div class="lot-item__right">
+            <?php if($isAuth === 1): ?>
             <div class="lot-item__state">
                 <div class="lot-item__timer timer <?= $class ?>">
                     <?=$hours ?>:<?=$minutes ?>
@@ -40,13 +43,14 @@ if ($lot['last_rate'] !== null) {
                     </div>
                 </div>
                 <form class="lot-item__form" action="https://echo.htmlacademy.ru" method="post" autocomplete="off">
-                    <p class="lot-item__form-item form__item"> <!-- form__item--invalid -->
+                    <p class="lot-item__form-item form__item">
                         <label for="cost"> Ваша ставка </label>
                         <input id="cost" type="text" name="cost" placeholder="12 000">
                     </p>
                     <button type="submit" class="button"> Сделать ставку</button>
                 </form>
             </div>
+            <?php endif; ?>
             <div class="history">
                 <h3> История ставок(<span>10 </span>)</h3>
                 <table class="history__list">
@@ -103,5 +107,6 @@ if ($lot['last_rate'] !== null) {
                 </table>
             </div>
         </div>
+
     </div>
 </section>
