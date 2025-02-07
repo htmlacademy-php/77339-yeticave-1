@@ -150,13 +150,13 @@ function getLotById(mysqli $con, int $id): array|false|null
 
     $sql = "SELECT  l.*,
                     c.designation AS category,
-                    r.amount AS last_rate,
+                    b.amount AS last_bet,
                     l.bet_step
             FROM lots l
             JOIN categories c ON l.category_id = c.id
-            LEFT JOIN rates r ON l.id = r.lot_id
+            LEFT JOIN bets b ON l.id = b.lot_id
             WHERE l.id = $id
-            ORDER BY r.sign_up_date DESC
+            ORDER BY b.sign_up_date DESC
             LIMIT 1;";
 
     $result = mysqli_query($con, $sql);
