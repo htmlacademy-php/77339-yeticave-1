@@ -51,7 +51,7 @@ function getLots(mysqli $con, ?int $categoryId = null): array
                     COALESCE(MAX(b.amount), l.initial_price) AS current_price
                 FROM lots l
                     JOIN categories c ON c.id = l.category_id
-                    LEFT JOIN rates b ON b.lot_id = l.id
+                    LEFT JOIN bets b ON b.lot_id = l.id
                 WHERE l.ended_at > NOW()
                 GROUP BY l.id, l.title, l.initial_price, l.img, l.date_create, l.date_end, c.id, c.designation
                 ORDER BY l.date_end, l.date_create DESC;";
@@ -62,7 +62,7 @@ function getLots(mysqli $con, ?int $categoryId = null): array
                     COALESCE(MAX(r.amount), l.start_price) AS current_price
                 FROM lots l
                     JOIN categories c ON c.id = l.category_id
-                    LEFT JOIN rates b ON b.lot_id = l.id
+                    LEFT JOIN bets b ON b.lot_id = l.id
                 WHERE l.ended_at > NOW() AND l.category_id = ?
                 GROUP BY l.id, l.title, l.initial_price, l.img, l.date_create, l.date_end, c.id, c.designation
                 ORDER BY l.date_end, l.date_create DESC;";
