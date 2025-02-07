@@ -4,52 +4,52 @@ CREATE DATABASE yeticave
 
 USE yeticave;
 
--- Структура таблицы `bets`
-
-CREATE TABLE `bets` (
-  `id` int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `amount` int UNSIGNED NOT NULL,
-  `user_id` int UNSIGNED NOT NULL,
-  `lot_id` int UNSIGNED NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (lot_id) REFERENCES lots(id) ON DELETE CASCADE
+CREATE TABLE categories (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  designation VARCHAR(100) NOT NULL UNIQUE,
+  symbol_code VARCHAR(50) NOT NULL UNIQUE
 );
 
--- Структура таблицы `categories`
-
-CREATE TABLE `categories` (
-  `id` int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `designation` varchar(100) NOT NULL UNIQUE,
-  `symbol_code` varchar(50) NOT NULL UNIQUE
+CREATE TABLE users (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  sign_up_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  email VARCHAR(60) NOT NULL UNIQUE,
+  name VARCHAR(60) NOT NULL,
+  password CHAR(60) NOT NULL,
+  contacts VARCHAR(500)
 );
 
--- Структура таблицы `lot`
-
-CREATE TABLE `lots` (
-  `id` int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `date_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `description` text,
-  `title` varchar(255) NOT NULL,
-  `img` varchar(255),
-  `date_end` datetime NOT NULL,
-  `initial_price` int UNSIGNED NOT NULL,
-  `bet_step` int UNSIGNED NOT NULL,
-  `author_id` int UNSIGNED NOT NULL,
-  `winner_id` int UNSIGNED NOT NULL,
-  `category_id` int UNSIGNED NOT NULL,
+CREATE TABLE lots (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  title VARCHAR(100) NOT NULL,
+  description TEXT,
+  img VARCHAR(255),
+  initial_price INT UNSIGNED NOT NULL,
+  date_end DATETIME NOT NULL,
+  bet_step INT UNSIGNED NOT NULL,
+  author_id INT UNSIGNED NOT NULL,
+  winner_id INT UNSIGNED DEFAULT NULL,
+  category_id INT UNSIGNED NOT NULL,
   FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE SET NULL,
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 );
 
--- Структура таблицы `user`
-
-CREATE TABLE `users` (
-  `id` int UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `sign_up_date` datetime DEFAULT CURRENT_TIMESTAMP,
-  `email` varchar(60) NOT NULL UNIQUE,
-  `name` varchar(60) NOT NULL,
-  `password` varchar(60) NOT NULL,
-  `contacts` text
+CREATE TABLE bets (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  date_create DATETIME DEFAULT CURRENT_TIMESTAMP,
+  amount INT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  lot_id INT UNSIGNED NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (lot_id) REFERENCES lots(id) ON DELETE CASCADE
 );
+
+/* Создание индексов для поиска
+CREATE INDEX idx_lots_category_id ON lots(category_id);
+CREATE INDEX idx_lots_author_id ON lots(author_id);
+CREATE INDEX idx_lots_winner_id ON lots(winner_id);
+CREATE INDEX idx_bids_user_id ON rates(user_id);
+CREATE INDEX idx_bids_lot_id ON rates(lot_id);
+ */

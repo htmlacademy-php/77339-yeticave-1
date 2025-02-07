@@ -1,10 +1,17 @@
 <?php
-require_once 'functions/database.php';
-require_once 'functions/functions.php';
-require_once 'functions/validation.php';
+session_start();
+
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
+
+require_once 'functions/template.php';
+require_once 'functions/validators.php';
+require_once 'functions/db.php';
 
 $config = require 'config.php';
 $db = connectDb($config);
 
-$isAuth = rand(0, 1);
-$userName = "Антон Башко";
+$isAuth = isUserAuthenticated($db);
+$userName = $isAuth ? $_SESSION['user']['designation'] : '';

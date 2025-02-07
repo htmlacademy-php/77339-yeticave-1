@@ -2,7 +2,7 @@
 
 require_once 'data.php';
 
-/** @var mysqli $dbn */
+/** @var mysqli $db */
 /** @var bool $isAuth */
 /** @var string $userName */
 
@@ -24,12 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: login.php');
             exit;
         } else {
-            $errors['database'] = 'Ошибка. Попробуйте позже.';
+            $errors['database'] = 'Ошибка записи в базу данных. Попробуйте позже.';
         }
     }
 }
 
-$pageContent = includeTemplate('sign-up.php', [
+$pageContent = includeTemplate('signup.php', [
     'errors' => $errors,
     'formData' => $formData,
 ]);

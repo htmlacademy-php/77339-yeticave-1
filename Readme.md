@@ -1,7 +1,7 @@
 # Личный проект «YetiCave»
 
-* Студент: [Антон Башко](https://up.htmlacademy.ru/php-individual/1/user/77339).
-* Наставник: Сергей Парфёнов.
+* Студент: [Антон Башко](https://up.htmlacademy.ru/php-individual/1/user/1515049).
+  * Наставник: `Сергей Парфёнов`.
 
 ---
 
