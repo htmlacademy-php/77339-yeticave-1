@@ -1,6 +1,6 @@
 # Личный проект «YetiCave»
 
-* Студент: [Наталья Романова](https://up.htmlacademy.ru/php-individual/1/user/1515049).
+* Студент: [Антон Башко](https://up.htmlacademy.ru/php-individual/1/user/1515049).
   * Наставник: `Сергей Парфёнов`.
 
 ---
