@@ -2,7 +2,6 @@
 
 require_once 'data.php';
 
-/** @var int $isAuth */
 /** @var string $userName */
 /** @var mysqli $db */
 
@@ -16,8 +15,7 @@ $pageContent = includeTemplate('404.php', [
 
 $layoutContent = includeTemplate('layout.php', [
     'content' => $pageContent,
-    'title' => "Страница не найдена",
-    'isAuth' => $isAuth,
+    'title' => "404 Страница не найдена",
     'userName' => $userName,
     'categories' => $categories,
 ]);

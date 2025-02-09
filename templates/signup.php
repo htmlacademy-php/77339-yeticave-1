@@ -2,7 +2,7 @@
     <h2>Регистрация нового аккаунта</h2>
     <div class="form__item<?= isset($errors['email']) ? ' form__item--invalid' : '' ?>">
         <label for="email">E-mail <sup>*</sup></label>
-        <input id="email" type="text" name="email" placeholder="Введите e-mail" value="<?= htmlspecialchars($formData['email'] ?? '') ?>">
+        <input id="email" type="text" name="email" placeholder="Введите e-mail" value="<?= screening($formData['email'] ?? '') ?>">
         <span class="form__error"><?= $errors['email'] ?? 'Введите e-mail' ?></span>
     </div>
     <div class="form__item<?= isset($errors['password']) ? ' form__item--invalid' : '' ?>">
@@ -12,17 +12,17 @@
     </div>
     <div class="form__item<?= isset($errors['designation']) ? ' form__item--invalid' : '' ?>">
         <label for="name">Имя <sup>*</sup></label>
-        <input id="name" type="text" name="name" placeholder="Введите имя" value="<?= htmlspecialchars($formData['designation'] ?? '') ?>">
+        <input id="name" type="text" name="name" placeholder="Введите имя" value="<?= screening($formData['designation'] ?? '') ?>">
         <span class="form__error"><?= $errors['designation'] ?? 'Введите имя' ?></span>
     </div>
     <div class="form__item<?= isset($errors['contacts']) ? ' form__item--invalid' : '' ?>">
         <label for="contacts">Контактные данные <sup>*</sup></label>
-        <textarea id="contacts" name="contacts" placeholder="Напишите как с вами связаться"><?= htmlspecialchars($formData['contacts'] ?? '') ?></textarea>
+        <textarea id="contacts" name="contacts" placeholder="Напишите как с вами связаться"><?= screening($formData['contacts'] ?? '') ?></textarea>
         <span class="form__error"><?= $errors['contacts'] ?? 'Напишите как с вами связаться' ?></span>
     </div>
     <?php if (!empty($errors)): ?>
         <span class="form__error form__error--bottom">Пожалуйста, исправьте ошибки в форме.</span>
     <?php endif; ?>
     <button type="submit" class="button">Зарегистрироваться</button>
-    <a class="text-link" href="/pages/login.html">Уже есть аккаунт</a>
+    <a class="text-link" href="/login.php">Уже есть аккаунт</a>
 </form>

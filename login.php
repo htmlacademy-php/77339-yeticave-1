@@ -1,10 +1,9 @@
 <?php
 
-require_once 'data.php';
+require_once("data.php");
 
-/** @var int $isAuth */
-/** @var string $userName */
 /** @var mysqli $db */
+/** @var string $userName */
 
 $categories = getCategories($db);
 $content = includeTemplate('login.php');
@@ -19,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $authResult = authenticateUser($form['email'], $form['password'], $db);
 
         if (isset($authResult['success']) && $authResult['success'] === true) {
-            $_SESSION['user'] = $authResult['user'];
+            $_SESSION['user_id'] = $authResult['user'];
             header('Location: /');
             exit();
         }
@@ -34,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         ]);
     }
 } else {
-    if (isset($_SESSION['user'])) {
+    if (isset($_SESSION['user_id'])) {
         header('Location: /');
         exit();
     }
@@ -43,7 +42,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 $layoutContent = includeTemplate('layout.php', [
     'content' => $content,
     'title' => "Вход на сайт",
-    'isAuth' => $isAuth,
     'userName' => $userName,
     'categories' => $categories,
 ]);
