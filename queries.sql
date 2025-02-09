@@ -24,33 +24,34 @@ INSERT INTO bets (amount, user_id, lot_id) VALUES
 (1000, 1, 1),
 (2000, 2, 3);
 
-#получаем все категории
+# получение всех категорий
 SELECT * FROM categories;
 
-#получаем самые новые, открытые лоты
-SELECT l.id, l.title, l.initial_price, l.img, c.designation, b.amount
+# получение самых новых, открытых лотов
+SELECT l.id, l.title, l.initial_price, l.img, c.designation AS category_designation,
+       COALESCE(MAX(b.amount), l.initial_price) AS current_price
 FROM lots l
        JOIN categories c ON c.id = l.category_id
        LEFT JOIN bets b ON b.lot_id = l.id
 WHERE l.date_end > NOW()
-GROUP BY l.id, l.title, l.initial_price, l.img, c.designation, b.amount
+GROUP BY l.id, l.title, l.initial_price, l.img, c.designation, l.date_create
 ORDER BY l.date_create DESC;
 
-#показываем лот по ID
-SELECT l.id, c.designation
+# показ лота по его ID
+SELECT l.*, c.designation
 FROM lots l
        JOIN categories c ON c.id = l.category_id
-WHERE l.id = 1;
+WHERE l.id = 3;
 
-#обновление названия лота по ID
+# обновление названия лота
 UPDATE lots
-SET title = 'Снегоступы'
-WHERE id = 4;
+SET title = 'Маска прикольная'
+WHERE id = 6;
 
-#получаем список ставок для лота по ID с сортировкой по дате
+# получение списка ставок для лота
 SELECT b.id, b.date_create, b.amount, l.title, u.name
 FROM bets b
        JOIN lots l ON l.id = b.lot_id
        JOIN users u ON u.id = b.user_id
-WHERE l.id = 3
+WHERE l.id = 7
 ORDER BY b.date_create DESC;

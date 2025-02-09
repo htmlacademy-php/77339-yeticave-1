@@ -46,10 +46,4 @@ CREATE TABLE bets (
   FOREIGN KEY (lot_id) REFERENCES lots(id) ON DELETE CASCADE
 );
 
-/* Создание индексов для поиска
-CREATE INDEX idx_lots_category_id ON lots(category_id);
-CREATE INDEX idx_lots_author_id ON lots(author_id);
-CREATE INDEX idx_lots_winner_id ON lots(winner_id);
-CREATE INDEX idx_bids_user_id ON rates(user_id);
-CREATE INDEX idx_bids_lot_id ON rates(lot_id);
- */
+CREATE FULLTEXT INDEX fulltext_title_description ON lots (title, description);

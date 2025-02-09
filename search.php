@@ -2,27 +2,27 @@
 
 require_once 'data.php';
 
-/** @var string $userName */
 /** @var mysqli $db */
+/** @var string $userName */
 
 $categories = getCategories($db);
 
-$lotId = getLotId($db);
-$lot = getLotById($db, $lotId);
+$search = trim($_GET['search'] ?? '');
+$lots = $search ? searchLots($db, $search) : getLots($db);
 
-$content = includeTemplate('lot.php', [
+
+$content = includeTemplate("main.php", [
     'categories' => $categories,
-    'userName' => $userName,
-    'lot' => $lot
+    'lots' => $lots,
+    'searchQuery' => $search,
 ]);
-
-$lotTitle = $lot['title'];
 
 $layoutContent = includeTemplate('layout.php', [
     'content' => $content,
-    'title' => $lotTitle,
+    'title' => "Поиск",
     'userName' => $userName,
     'categories' => $categories,
+    'searchQuery' => $search,
 ]);
 
 print($layoutContent);

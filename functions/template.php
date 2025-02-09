@@ -1,23 +1,26 @@
 <?php
 
 /**
- * подсчитывание времени до окончания показа лота
- * @param string $expiringDate
+ * подсчёт времени до окончания показа лота
+ * @param string $date
  * @return array
  */
-
-function getTimeRemaining(string $expiringDate): array
+function getTimeRemaining(string $date): array
 {
-    $timeDifference = strtotime($expiringDate) - time();
+    $date_now = time();
+    $date = strtotime($date);
+    $time_diff = $date - $date_now;
+    $hours = str_pad((floor($time_diff / (60 * 60))), 2, '0', STR_PAD_LEFT);
+    $minutes = str_pad((floor($time_diff / 60 - $hours * 60)), 2, '0', STR_PAD_LEFT);
 
-    if ($timeDifference <= 0) {
-        return [0, 0];
+    if ($date < $date_now) {
+        $result[] = '00';
+        $result[] = '00';
     }
 
-    $hours = floor($timeDifference / 3600);
-    $minutes = floor(($timeDifference % 3600) / 60);
-
-    return [$hours, $minutes];
+    $result[] = $hours;
+    $result[] = $minutes;
+    return $result;
 }
 
 /**
@@ -25,7 +28,6 @@ function getTimeRemaining(string $expiringDate): array
  * @param int|float $price
  * @return string
  */
-
 function formatPrice(int|float $price): string
 {
     $price = number_format($price, 0, '.', ' ');
@@ -33,12 +35,11 @@ function formatPrice(int|float $price): string
 }
 
 /**
- * подключение шаблона, передача в него данных и возвращение итогового HTML контента
+ * подключение шаблона
  * @param string $name
  * @param array $data
  * @return string
  */
-
 function includeTemplate(string $name, array $data = []): string
 {
     $name = 'templates/' . $name;
@@ -58,12 +59,11 @@ function includeTemplate(string $name, array $data = []): string
 }
 
 /**
- * получение ID лота из параметров запроса и валидация
+ * получение ID лота
  * @param mysqli $db
- * @return int $lotId
+ * @return int
  */
-
-function getLotID(mysqli $db): int
+function getLotId(mysqli $db): int
 {
     $lotId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
@@ -78,16 +78,4 @@ function getLotID(mysqli $db): int
         exit();
     }
     return $lotId;
-}
-
-/**
- * обрабатка входа пользователя.
- * @param array $user
- * @return void
- */
-
-function handleSuccessfulLogin(array $user): void {
-    $_SESSION['user'] = $user;
-    header('Location: /');
-    exit();
 }
