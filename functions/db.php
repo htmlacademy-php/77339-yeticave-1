@@ -266,3 +266,131 @@ function searchLots(mysqli $db, string $search): array {
 
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
+
+/**
+ * получение списка ставок для указанного лота
+ * @param mysqli $db
+ * @param int $lotId
+ * @return array
+ */
+
+function getLotBets(mysqli $db, int $lotId): array {
+    $sql = "SELECT b.amount, u.name, b.created_at
+            FROM bets b
+            JOIN users u ON b.user_id = u.id
+            WHERE b.lot_id = ?
+            ORDER BY b.date_create DESC";
+
+    $stmt = dbGetPrepareStmt($db, $sql, [$lotId]);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+/**
+ * получение ставок пользователя
+ * @param mysqli $db
+ * @param int $userId
+ * @return array
+ */
+
+function getUserBets(mysqli $db, int $userId): array
+{
+    $sql = "
+        SELECT
+            b.id AS bet_id,
+            b.amount AS bet_amount,
+            b.date_create AS bet_creation,
+            l.id AS lot_id,
+            l.title AS lot_title,
+            l.img AS lot_image,
+            l.date_end AS lot_end_date,
+            c.designation AS category_name,
+            u.contacts AS winner_contacts
+        FROM bets b
+        JOIN lots l ON r.lot_id = l.id
+        JOIN categories c ON l.category_id = c.id
+        JOIN users u ON l.author_id = u.id
+        WHERE b.user_id = ?
+        ORDER BY b.date_create DESC;
+    ";
+
+    $stmt = dbGetPrepareStmt($db, $sql, [$userId]);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+/**
+ * добавление ставки в базу данных
+ * @param mysqli $db
+ * @param int $userId
+ * @param int $lotId
+ * @param int $betValue
+ * @return bool
+ */
+
+function addBet(mysqli $db, int $userId, int $lotId, int $betValue): bool {
+    $sql = "INSERT INTO bets (user_id, lot_id, amount, date_create) VALUES (?, ?, ?, NOW())";
+    $stmt = dbGetPrepareStmt($db, $sql, [$userId, $lotId, $betValue]);
+
+    return mysqli_stmt_execute($stmt);
+}
+
+/**
+ * получение ID победителя для лота
+ * @param mysqli $db
+ * @param int $lotId
+ * @return int|null
+ */
+
+function getWinner(mysqli $db, int $lotId): ?int
+{
+    $bets = getLotBets($db, $lotId);
+
+    if ($bets) {
+
+        return $bets[0]['user_id'];
+    }
+
+    return null;
+}
+
+/**
+ * обновление столбца winner_id в таблице lots
+ * @param mysqli $link
+ * @param int $lotId
+ * @param int $winnerId
+ * @return bool
+ */
+
+function updateWinnerID(mysqli $link, int $lotId, int $winnerId): bool
+{
+    $sql = "UPDATE lots SET winner_id = ? WHERE id = ?";
+    $data = [$winnerId, $lotId];
+    $stmt = dbGetPrepareStmt($link, $sql, $data);
+    $result = mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+
+    return $result;
+}
+
+/**
+ * получение максимальной ставки для лота
+ * @param mysqli $db
+ * @param int $lotId
+ * @return float
+ */
+
+function getMaxBet(mysqli $db, int $lotId): float
+{
+    $sql = "SELECT MAX(amount) AS max_amount FROM bets WHERE lot_id = ?";
+    $stmt = dbGetPrepareStmt($db, $sql, [$lotId]);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($result);
+
+    return (float)($row['max_amount'] ?? 0);
+}

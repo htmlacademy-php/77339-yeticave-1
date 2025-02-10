@@ -17,9 +17,9 @@ $isHomePage = $_SERVER['SCRIPT_NAME'] === '/index.php';
 <head>
     <meta charset="UTF-8">
     <title><?= $title ?></title>
-    <link href="css/normalize.min.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/flatpickr.min.css">
+    <link href="../css/normalize.min.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/flatpickr.min.css">
 </head>
 <body>
 <div class="page-wrapper">
@@ -28,7 +28,7 @@ $isHomePage = $_SERVER['SCRIPT_NAME'] === '/index.php';
         <div class="main-header__container container">
             <h1 class="visually-hidden">YetiCave</h1>
             <a class="main-header__logo" href="/">
-                <img src="img/logo.svg" width="160" height="39" alt="Логотип компании YetiCave">
+                <img src="../img/logo.svg" width="160" height="39" alt="Логотип компании YetiCave">
             </a>
             <form class="main-header__search" method="get" action="/search.php" autocomplete="off">
                 <input type="search" name="search" placeholder="Поиск лота" value="<?= isset($searchQuery) ? screening($searchQuery) : '' ?>">
@@ -43,7 +43,7 @@ $isHomePage = $_SERVER['SCRIPT_NAME'] === '/index.php';
                 if ($userName): ?>
                     <div class="user-menu__logged">
                         <p><?= screening($userName); ?></p>
-                        <a class="user-menu__bets" href="../pages/my-bets.html">Мои ставки</a>
+                        <a class="user-menu__bets" href="../my-bets.php">Мои ставки</a>
                         <a class="user-menu__logout" href="../logout.php">Выход</a>
                     </div>
                 <?php
@@ -87,7 +87,7 @@ $isHomePage = $_SERVER['SCRIPT_NAME'] === '/index.php';
                     <?php
                     foreach ($categories as $category): ?>
                         <li class="promo__item promo__item--<?= screening($category["symbol_code"]) ?>">
-                            <a class="promo__link" href="/?category_id=<?= $category['id'] ?>"><?= screeinig($category["designation"]) ?></a>
+                            <a class="promo__link" href="/?category_id=<?= $category['id'] ?>"><?= screening($category["designation"]) ?></a>
                         </li>
                     <?php
                     endforeach; ?>

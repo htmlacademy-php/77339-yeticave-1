@@ -26,7 +26,7 @@ $pageContent = includeTemplate('main.php', [
 
 if (empty($lots)) {
     if($categoryId) {
-        $pageContent = "<pre><h2>Нет доступных лотов в категории <span>«" . htmlspecialchars($categoryName) . "»</span></h2>";
+        $pageContent = "<pre><h2>Нет доступных лотов в категории <span>«" . screening($categoryName) . "»</span></h2>";
     } else {
         $pageContent = "<h2>На данный момент нет доступных лотов.</h2>";
     }
