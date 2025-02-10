@@ -79,3 +79,43 @@ function getLotId(mysqli $db): int
     }
     return $lotId;
 }
+
+/**
+ * форматирование даты
+ * @param string $date
+ * @return string
+ */
+function timeAgo(string $date): string {
+    $timestamp = strtotime($date);
+    $diff = time() - $timestamp;
+
+    if ($diff < 60) {
+        return "$diff секунд назад";
+    } elseif ($diff < 3600) {
+        return floor($diff / 60) . " минут назад";
+    } elseif ($diff < 86400) {
+        return floor($diff / 3600) . " часов назад";
+    } else {
+        return date("d.m.y в H:i", $timestamp);
+    }
+}
+
+/**
+ * рассчёт текущей цены лота и минимальной ставки
+ * @param array $lot
+ * @return array
+ */
+function calculateLotPrices(array $lot): array {
+    if ($lot['last_bet'] !== null) {
+        $currentPrice = $lot['last_bet'];
+        $minBet = $lot['last_bet'] + $lot['bet_step'];
+    } else {
+        $currentPrice = $lot['start_price'];
+        $minBet = $lot['start_price'] + $lot['bet_step'];
+    }
+
+    return [
+        'current_price' => $currentPrice,
+        'min_bet' => $minBet
+    ];
+}

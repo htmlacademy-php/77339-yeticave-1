@@ -2,7 +2,7 @@
 
 /**
  * аутентификация пользователя по email и паролю.
- * @param mysqli $db
+ * @param mysqli $link
  * @param string $email
  * @param string $password
  * @return array
@@ -324,4 +324,25 @@ function getNounPluralForm(int $number, string $one, string $two, string $many):
         default:
             return $many;
     }
+}
+
+/**
+ * валидация ставки
+ * @param mixed $betValue
+ * @param int $minBet
+ * @return string|null
+ */
+function validateBet(mixed $betValue, int $minBet): ?string {
+    if (empty($betValue)) {
+        return "Сделайте вашу ставку.";
+    }
+
+    $error = validatePositiveInt($betValue);
+    if ($error) {
+        return "Ставка должна быть целым положительным числом.";
+    }
+    if ((int) $betValue < $minBet) {
+        return "Ставка должна быть не меньше $minBet.";
+    }
+    return null;
 }
