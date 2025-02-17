@@ -1,4 +1,5 @@
 <?php
+
 require_once 'data.php';
 
 /** @var string $userName */
@@ -7,35 +8,35 @@ require_once 'data.php';
 /** @var array $categories */
 /** @var $pagination */
 
-$bets = getUserBets($db, $userId);
+$rates = getUserBets($db, $userId);
 
-$processedBets = [];
-foreach ($bets as $bet) {
-    $lotEndDate = new DateTime($bet['lot_end_date']);
+$processedRates = [];
+foreach ($rates as $rate) {
+    $lotEndDate = new DateTime($rate['lot_end_date']);
     $now = new DateTime();
     $isLotEnded = $now > $lotEndDate;
-    $isBetWinning = $isLotEnded && ($bet['bet_amount'] == getMaxBet($db, $bet['lot_id']));
+    $isRateWinning = $isLotEnded && ($rate['rate_amount'] == getMaxBetForLot($db, $rate['lot_id']));
 
-    $remainingTime = $isLotEnded ? ['00', '00'] : getTimeRemaining($bet['lot_end_date']);
+    $remainingTime = $isLotEnded ? ['00', '00'] : getTimeRemaining($rate['lot_end_date']);
 
-    $processedBets[] = [
-        'lot_id' => $bet['lot_id'],
-        'lot_title' => screening($bet['lot_title']),
-        'lot_image' => screening($bet['lot_image']),
-        'category_name' => screening($bet['category_name']),
-        'bet_amount' => $bet['bet_amount'],
-        'bet_creation' => $bet['bet_creation'],
+    $processedRates[] = [
+        'lot_id' => $rate['lot_id'],
+        'lot_title' => screening($rate['lot_title']),
+        'lot_image' => screening($rate['lot_image']),
+        'category_name' => screening($rate['category_name']),
+        'rate_amount' => $rate['rate_amount'],
+        'rate_created_at' => $rate['rate_created_at'],
         'isLotEnded' => $isLotEnded,
-        'isBetWinning' => $isBetWinning,
+        'isRateWinning' => $isRateWinning,
         'remaining_time' => $remainingTime,
-        'formatted_price' => formatPrice($bet['bet_amount']),
-        'contacts' => $bet['winner_contacts'],
-        'time_ago' => timeAgo($bet['bet_creation']),
+        'formatted_price' => formatPrice($rate['rate_amount']),
+        'contacts' => $rate['winner_contacts'],
+        'time_ago' => timeAgo($rate['rate_created_at']),
     ];
 }
 
 $content = includeTemplate('my-bets.php', [
-    'bets' => $processedBets,
+    'bets' => $processedRates,
     'userName' => screening($userName),
 ]);
 

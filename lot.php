@@ -16,11 +16,11 @@ $minutes = $remainingTime[1];
 $class = ($hours < 1) ? 'timer--finishing' : '';
 
 $lotPrices = calculateLotPrices($lot);
-$initialPrice = $lotPrices['current_price'];
-$minBet = $lotPrices['min_bet'];
+$currentPrice = $lotPrices['current_price'];
+$minRate = $lotPrices['min_rate'];
 
 $isLotOwner = (int) $lot['author_id'] === $userId;
-$isLastBetByUser = lastBetUser($db, $lotId) === $userId;
+$isLastRateByUser = lastBetUser($db, $lotId) === $userId;
 $errors = [];
 
 handleEndedAuction($db, $lotId);
@@ -32,25 +32,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cost'])) {
         exit('Вы должны войти, чтобы делать ставки.');
     }
 
-    $betValue = trim($_POST['cost']);
+    $rateValue = trim($_POST['cost']);
 
     $lotPrices = calculateLotPrices($lot);
-    $minBet = $lotPrices['min_bet'];
+    $minRate = $lotPrices['min_rate'];
 
-    $lastBetUserId = lastBetUser($db, $lotId);
+    $lastRateUserId = lastBetUser($db, $lotId);
 
-        $error = validateBet($betValue, $minBet, $userId, $lastBetUserId);
+    $error = validateBet($rateValue, $minRate, $userId, $lastRateUserId);
 
     if ($error) {
         $errors['cost'] = $error;
     } else {
-        addBet($db, $userId, $lotId, (int) $betValue);
+        addBet($db, $userId, $lotId, (int) $rateValue);
         header("Location: lot.php?id=$lotId");
         exit();
     }
 }
 
-$bets = getLotBets($db, $lotId);
+$rates = getLotBets($db, $lotId);
 
 $content = includeTemplate('lot.php', [
     'categories' => $categories,
@@ -59,14 +59,14 @@ $content = includeTemplate('lot.php', [
     'hours' => $hours,
     'minutes' => $minutes,
     'class' => $class,
-    'initialPrice' => $initialPrice,
-    'minBet' => $minBet,
+    'currentPrice' => $currentPrice,
+    'minRate' => $minRate,
     'errors' => $errors,
     'lotId' => $lotId,
     'isAuctionEnded' => strtotime($lot['date_end']) < time(),
     'isLotOwner' => $isLotOwner,
-    'isLastBetByUser' => $isLastBetByUser,
-    'bets' => $bets,
+    'isLastRateByUser' => $isLastRateByUser,
+    'bets' => $rates,
 ]);
 
 $lotTitle = $lot['title'];

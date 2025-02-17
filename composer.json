@@ -1,0 +1,25 @@
+{
+  "name": "f/1515049-yeticave-1",
+  "autoload": {
+    "psr-4": {
+      "F\\1515049Yeticave1\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Наталья Романова",
+      "email": "Natalocka_ne@mail.ru"
+    }
+  ],
+  "require": {
+    "symfony/mailer": "^7.2",
+    "symfony/mime": "^7.2",
+    "ext-mysqli": "*",
+    "ext-fileinfo": "*"
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "*",
+    "friendsofphp/php-cs-fixer": "*",
+    "phpmd/phpmd": "^2.15"
+  }
+}

@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id'])) {
 $userId = $_SESSION['user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $result = handleAddLotForm($_POST, $_FILES, $db, $categories, $_SESSION['user_id']);
+    $result = addLotForm($_POST, $_FILES, $db, $categories, $_SESSION['user_id']);
 
     if ($result['success']) {
         header('Location: ' . $result['redirect']);

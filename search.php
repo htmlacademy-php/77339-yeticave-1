@@ -1,6 +1,6 @@
 <?php
 
-require_once 'data.php';
+require_once("data.php");
 
 /** @var mysqli $db */
 /** @var string $userName */
@@ -9,12 +9,12 @@ require_once 'data.php';
 
 $search = trim($_GET['search'] ?? '');
 
-if(empty($searchQuery)){
+if(empty($search)){
     header("Location: /");
     exit();
 }
 
-$lots = searchLots($db, $searchQuery);
+$lots = searchLots($db, $search);
 
 
 $content = includeTemplate("main.php", [

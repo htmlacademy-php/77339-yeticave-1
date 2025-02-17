@@ -2,8 +2,8 @@
 
 require_once 'data.php';
 
-/** @var mysqli $db */
-/** @var array $config*/
+/** @var mysqli $db Ресурс подключения */
+/** @var array $config Данные конфигурации*/
 
 $lots = getLotsWithoutWinners($db);
 
