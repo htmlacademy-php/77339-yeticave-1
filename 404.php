@@ -4,10 +4,9 @@ require_once 'data.php';
 
 /** @var string $userName */
 /** @var mysqli $db */
+/** @var array $categories */
 
 http_response_code(404);
-
-$categories = getCategories($db);
 
 $pageContent = includeTemplate('404.php', [
     'categories' => $categories,

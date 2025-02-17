@@ -1,15 +1,17 @@
 <?php
 
 require_once 'data.php';
+require_once 'getwinner.php';
 
 /** @var mysqli $db */
 /** @var string $userName */
+/** @var array $categories */
+/** @var $categoryId */
+/** @var $pageItems */
+/** @var $paginationData */
+/** @var $pagination */
 
-$categories = getCategories($db);
-
-$categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
-
-$lots = getLots($db, $categoryId);
+$lots = getLots($db, $categoryId, $pageItems, $paginationData['offset']);
 
 $categoryName = null;
 if ($categoryId) {
@@ -38,6 +40,7 @@ $layoutContent = includeTemplate('layout.php', [
     'categoryId' => $categoryId,
     'userName' => $userName,
     'categories' => $categories,
+    'pagination' => $pagination,
 ]);
 
 print($layoutContent);

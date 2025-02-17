@@ -4,11 +4,17 @@ require_once 'data.php';
 
 /** @var mysqli $db */
 /** @var string $userName */
-
-$categories = getCategories($db);
+/** @var array $categories */
+/** @var $pagination */
 
 $search = trim($_GET['search'] ?? '');
-$lots = $search ? searchLots($db, $search) : getLots($db);
+
+if(empty($searchQuery)){
+    header("Location: /");
+    exit();
+}
+
+$lots = searchLots($db, $searchQuery);
 
 
 $content = includeTemplate("main.php", [
@@ -23,6 +29,7 @@ $layoutContent = includeTemplate('layout.php', [
     'userName' => $userName,
     'categories' => $categories,
     'searchQuery' => $search,
+    'pagination' => $pagination,
 ]);
 
 print($layoutContent);
