@@ -1,42 +1,41 @@
 <?php
 
 /**
- * обработка формы добавления лота
- * @param array $postData
- * @param array $fileData
- * @param mysqli $db
- * @param array $categories
- * @param int $userId
- * @return array
+ * Обработка формы добавления лота
+ *
+ * @param array $postData Данные из формы
+ * @param array $fileData Данные о загруженных файлах
+ * @param mysqli $dbConnection Соединение с базой данных
+ * @param array $categories Список категорий (для валидации)
+ * @return array Массив с результатом обработки ['success' => bool, 'content' => string, 'errors' => array]
  */
-
-function addLotForm(array $postData, array $fileData, mysqli $db, array $categories, int $userId): array
+function addLotForm(array $postData, array $fileData, mysqli $dbConnection, array $categories, int $userId): array
 {
-    $errors = validateAddLotForm($postData, $db);
+    $errors = validateAddLotForm($postData, $dbConnection);
 
     $fileName = null;
 
     if (!isset($errors['file'])) {
-        $fileName = processFileUpload($fileData['img'], 'uploads');
+        $fileName = processFileUpload($fileData['lot-img'], 'uploads');
 
         if ($fileName === null) {
-            $errors['file'] = "Ошибка при загрузке изображения.";
+            $errors['file'] = "Ошибка при загрузке изображения. Убедитесь, что файл выбран и имеет формат jpg, jpeg или png.";
         }
     }
 
     if (empty($errors)) {
         $newLotData = [
-            $postData['title'],                 // title
-            (int)$postData['category'],         // category_id
-            $postData['description'],           // description
-            'uploads/' . $fileName,             // img
-            (float)$postData['initial_price'],  // initial_price
-            (int)$postData['bet_step'],         // bet_step
-            $userId,                             // author_id
-            $postData['date_end'],              // date_end
+            $postData['lot-name'],         // title
+            (int)$postData['category'],    // category_id
+            $postData['description'],          // description
+            'uploads/' . $fileName,        // img
+            (float)$postData['lot-rate'],  // start_price
+            (int)$postData['lot-step'],    // bet_step
+            $userId,                       // author_id
+            $postData['lot-date'],         // date_end
         ];
 
-        $result = addLotToDb($newLotData, $db);
+        $result = addLot($newLotData, $dbConnection);
 
         if ($result['success']) {
             return [

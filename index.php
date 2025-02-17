@@ -11,12 +11,13 @@ require_once 'getwinner.php';
 /** @var $paginationData */
 /** @var $pagination */
 
+
 $lots = getLots($db, $categoryId, $pageItems, $paginationData['offset']);
 
 $categoryName = null;
 if ($categoryId) {
     $category = current(array_filter($categories, fn($cat) => $cat['id'] == $categoryId));
-    $categoryName = $category['designation'] ?? null;
+    $categoryName = $category['name'] ?? null;
 }
 
 $pageContent = includeTemplate('main.php', [
@@ -27,8 +28,8 @@ $pageContent = includeTemplate('main.php', [
 ]);
 
 if (empty($lots)) {
-    if($categoryId) {
-        $pageContent = "<pre><h2>Нет доступных лотов в категории <span>«" . screening($categoryName) . "»</span></h2>";
+    if ($categoryId) {
+        $pageContent = "<pre><h2>Нет доступных лотов в категории «" . screening($categoryName) . "»</h2>";
     } else {
         $pageContent = "<h2>На данный момент нет доступных лотов.</h2>";
     }

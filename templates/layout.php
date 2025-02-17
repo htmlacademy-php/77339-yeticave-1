@@ -8,7 +8,7 @@
 /** @var  $categoryId */
 /** @var  $pagination */
 
-$isLotPage = TRUE;
+$isLotPage = true;
 
 $isHomePage = $_SERVER['SCRIPT_NAME'] === '/index.php';
 ?>
@@ -18,9 +18,9 @@ $isHomePage = $_SERVER['SCRIPT_NAME'] === '/index.php';
 <head>
     <meta charset="UTF-8">
     <title><?= $title ?></title>
-    <link href="../css/normalize.min.css" rel="stylesheet">
-    <link href="../css/style.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/flatpickr.min.css">
+    <link href="css/normalize.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/flatpickr.min.css">
 </head>
 <body>
 <div class="page-wrapper">
@@ -29,26 +29,34 @@ $isHomePage = $_SERVER['SCRIPT_NAME'] === '/index.php';
         <div class="main-header__container container">
             <h1 class="visually-hidden">YetiCave</h1>
             <a class="main-header__logo" href="/">
-                <img src="../img/logo.svg" width="160" height="39" alt="Логотип компании YetiCave">
+                <img src="img/logo.svg" width="160" height="39" alt="Логотип компании YetiCave">
             </a>
             <form class="main-header__search" method="get" action="/search.php" autocomplete="off">
-                <input type="search" name="search" placeholder="Поиск лота" value="<?= isset($searchQuery) ? screening($searchQuery) : '' ?>">
-                <input class="main-header__search-btn" type="submit" name="find" value="Найти">
+                <input type="search"
+                       name="search"
+                       placeholder="Поиск лота"
+                       value="<?= isset($searchQuery) ? screening($searchQuery) : '' ?>">
+                <input class="main-header__search-btn"
+                       type="submit"
+                       name="find"
+                       value="Найти">
             </form>
-            <?php if($userName): ?>
+            <?php if ($userName) : ?>
             <a class="main-header__add-lot button" href="../add.php">Добавить лот</a>
             <?php endif; ?>
 
             <nav class="user-menu">
+
+                <!-- здесь должен быть PHP код для показа меню и данных пользователя -->
                 <?php
-                if ($userName): ?>
+                if ($userName) : ?>
                     <div class="user-menu__logged">
                         <p><?= screening($userName); ?></p>
                         <a class="user-menu__bets" href="../my-bets.php">Мои ставки</a>
                         <a class="user-menu__logout" href="../logout.php">Выход</a>
                     </div>
-                <?php
-                else: ?>
+                    <?php
+                else : ?>
                     <ul class="user-menu__list">
                         <li class="user-menu__item">
                             <a href="/signup.php">Регистрация</a>
@@ -57,60 +65,75 @@ $isHomePage = $_SERVER['SCRIPT_NAME'] === '/index.php';
                             <a href="/login.php">Вход</a>
                         </li>
                     </ul>
-                <?php
+
+                    <?php
                 endif; ?>
+
             </nav>
         </div>
     </header>
+
     <?php
-    if (!$isHomePage || $categoryId): ?>
+    if (!$isHomePage || $categoryId) : ?>
         <nav class="nav">
             <ul class="nav__list container">
                 <?php
-                foreach ($categories as $category): ?>
+                foreach ($categories as $category) : ?>
                     <li class="nav__item <?= $category['id'] == $categoryId ? 'nav__item--current' : '' ?>">
-                        <a href="/?category_id=<?= $category['id'] ?>"><?= screening($category["designation"]) ?></a>
+                        <a href="/?category_id=<?= $category['id'] ?>"><?= screening($category["name"]) ?></a>
                     </li>
-                <?php
+                    <?php
                 endforeach; ?>
             </ul>
         </nav>
-    <?php
+        <?php
     endif; ?>
+
+
     <main class="container">
         <?php
-        if ($isHomePage && !$categoryId): ?>
+        if ($isHomePage && !$categoryId) : ?>
             <section class="promo">
                 <h2 class="promo__title">Нужен стафф для катки?</h2>
                 <p class="promo__text">На нашем интернет-аукционе ты найдёшь самое эксклюзивное сноубордическое и
                     горнолыжное снаряжение.</p>
                 <ul class="promo__list">
+                    <!--заполните этот список из массива категорий-->
                     <?php
-                    foreach ($categories as $category): ?>
+                    foreach ($categories as $category) : ?>
                         <li class="promo__item promo__item--<?= screening($category["symbol_code"]) ?>">
-                            <a class="promo__link" href="/?category_id=<?= $category['id'] ?>"><?= screening($category["designation"]) ?></a>
+                            <a class="promo__link"
+                               href="/?category_id=<?= $category['id'] ?>">
+                                <?= screening($category["name"]) ?>
+                            </a>
                         </li>
-                    <?php
+                        <?php
                     endforeach; ?>
                 </ul>
             </section>
             <?= $content; ?>
-        <?php
-        else: ?>
+            <?php
+        else : ?>
             <?= $content; ?>
-        <?php
+            <?php
         endif; ?>
+
+        <?= $pagination; ?>
     </main>
+
+
 </div>
+
 <footer class="main-footer">
     <nav class="nav">
         <ul class="nav__list container">
+            <!--заполните этот список из массива категорий-->
             <?php
-            foreach ($categories as $category): ?>
+            foreach ($categories as $category) : ?>
                 <li class="nav__item <?= $category['id'] == $categoryId ? 'nav__item--current' : '' ?>">
-                    <a href="/?category_id=<?= $category['id'] ?>"><?= screening($category["designation"]); ?></a>
+                    <a href="/?category_id=<?= $category['id'] ?>"><?= screening($category["name"]); ?></a>
                 </li>
-            <?php
+                <?php
             endforeach; ?>
         </ul>
     </nav>
@@ -157,7 +180,7 @@ $isHomePage = $_SERVER['SCRIPT_NAME'] === '/index.php';
                 </svg>
             </a>
         </div>
-        <?php if($userName): ?>
+        <?php if ($userName) : ?>
         <a class="main-footer__add-lot button" href="/add.php">Добавить лот</a>
         <?php endif; ?>
         <div class="main-footer__developed-by">

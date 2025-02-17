@@ -7,7 +7,9 @@
 *.sublime*
 Thumbs.db
 vendor
+/phpmd.xml
 uploads/*
 !uploads/.gitkeep
 *.drawio
 /query
+/phpcs-report.txt

@@ -6,7 +6,6 @@ require_once 'data.php';
 /** @var string $userName */
 /** @var array $categories */
 
-$categories = getCategories($db);
 $errors = [];
 $formData = [];
 
@@ -29,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
 
 $pageContent = includeTemplate('signup.php', [
     'errors' => $errors,

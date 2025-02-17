@@ -1,17 +1,17 @@
 <?php
 
 /**
- * загрузка файла с валидацией по MIME-типу
- * @param array $file
- * @param string $uploadDir
- * @return string|null
+ * Загрузка файла с валидацией по MIME-типу
+ *
+ * @param array $file данные о файле из формы
+ * @param string $uploadDir папка, куда надо сохранить файл
+ * @return string|null имя файла при успешной загрузке, null в противном случае
  */
-
 function processFileUpload(array $file, string $uploadDir): ?string
 {
     $allowedMimeTypes = ['image/jpeg', 'image/png'];
 
-    if (empty($file['designation']) || !is_uploaded_file($file['tmp_name'])) {
+    if (empty($file['name']) || !is_uploaded_file($file['tmp_name'])) {
         return null;
     }
 

@@ -28,17 +28,17 @@ INSERT INTO bets (amount, user_id, lot_id) VALUES
 SELECT * FROM categories;
 
 # получение самых новых, открытых лотов
-SELECT l.id, l.title, l.initial_price, l.img, c.designation AS category_designation,
+SELECT l.id, l.title, l.initial_price, l.img, c.name AS category_name,
        COALESCE(MAX(b.amount), l.initial_price) AS current_price
 FROM lots l
        JOIN categories c ON c.id = l.category_id
        LEFT JOIN bets b ON b.lot_id = l.id
 WHERE l.date_end > NOW()
-GROUP BY l.id, l.title, l.initial_price, l.img, c.designation, l.date_create
+GROUP BY l.id, l.title, l.initial_price, l.img, c.name, l.date_create
 ORDER BY l.date_create DESC;
 
 # показ лота по его ID
-SELECT l.*, c.designation
+SELECT l.*, c.name
 FROM lots l
        JOIN categories c ON c.id = l.category_id
 WHERE l.id = 3;

@@ -14,9 +14,10 @@ $pageContent = includeTemplate('404.php', [
 
 $layoutContent = includeTemplate('layout.php', [
     'content' => $pageContent,
-    'title' => "404 Страница не найдена",
+    'title' => "404-страница не найдена",
     'userName' => $userName,
     'categories' => $categories,
+    'pagination' => '',
 ]);
 
 print($layoutContent);
