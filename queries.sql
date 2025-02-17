@@ -1,6 +1,6 @@
 USE yeticave;
 
-INSERT INTO categories (symbol_code, designation) VALUES
+INSERT INTO categories (symbol_code, name) VALUES
 ('boards', 'Доски и лыжи'),
 ('attachment', 'Крепления'),
 ('boots', 'Ботинки'),
