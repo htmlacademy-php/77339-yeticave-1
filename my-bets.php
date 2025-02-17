@@ -5,6 +5,7 @@ require_once 'data.php';
 /** @var mysqli $db */
 /** @var int|string $userId */
 /** @var array $categories */
+/** @var $pagination */
 
 $bets = getUserBets($db, $userId);
 
@@ -43,6 +44,7 @@ $layoutContent = includeTemplate('layout.php', [
     'title' => 'Мои ставки',
     'userName' => screening($userName),
     'categories' => $categories,
+    'pagination' => '',
 ]);
 
 print($layoutContent);

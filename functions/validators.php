@@ -332,17 +332,112 @@ function getNounPluralForm(int $number, string $one, string $two, string $many):
  * @param int $minBet
  * @return string|null
  */
-function validateBet(mixed $betValue, int $minBet): ?string {
-    if (empty($betValue)) {
+function validateBet(mixed $rateValue, int $minRate, int $currentUserId, int|null $lastUserId = null): ?string {
+    if (empty($rateValue)) {
         return "Сделайте вашу ставку.";
     }
 
-    $error = validatePositiveInt($betValue);
+    $error = validatePositiveInt($rateValue);
     if ($error) {
         return "Ставка должна быть целым положительным числом.";
     }
-    if ((int) $betValue < $minBet) {
-        return "Ставка должна быть не меньше $minBet.";
+
+    if ((int) $rateValue < $minRate) {
+        return "Ставка должна быть не меньше $minRate.";
     }
+
+    if ($lastUserId === $currentUserId) {
+        return "Вы не можете делать две ставки подряд.";
+    }
+
     return null;
+}
+
+/**
+ * Проверка, завершился ли аукцион, и если да, обновление победителя
+ * @param mysqli $db
+ * @param int $lotId
+ */
+function handleEndedAuction(mysqli $db, int $lotId): void
+{
+    $lot = getLotById($db, $lotId);
+
+    // Проверяем, завершен ли аукцион
+    $isAuctionEnded = strtotime($lot['date_end']) < time();
+    if ($isAuctionEnded) {
+        $winnerId = getWinnerIdFromBets($db, $lotId);
+
+        if ($winnerId) {
+            updateLotWinner($db, $lotId, $winnerId);
+        }
+    }
+}
+
+/**
+ * Аутентификация пользователя по email и паролю.
+ * @param string $email
+ * @param string $password
+ * @param mysqli $db
+ * @return array
+ */
+function authenticateUser(string $email, string $password, mysqli $db): array {
+    $user = findUserByEmail($email, $db);
+
+    if (!$user) {
+        return ['errors' => ['email' => 'Пользователь с этим email не найден']];
+    }
+
+    if (!password_verify($password, $user['password'])) {
+        return ['errors' => ['password' => 'Неверный пароль']];
+    }
+
+    return ['success' => true, 'user' => $user];
+}
+
+/** валидация формы авторизации
+ * @param array $form
+ * @return array
+ */
+function validateLoginForm(array $form): array {
+    $errors = [];
+    $required = ['email', 'password'];
+
+    foreach ($required as $field) {
+        if (empty(trim($form[$field] ?? ''))) {
+            $errors[$field] = 'Это поле должно быть заполнено';
+        }
+    }
+
+    return $errors;
+}
+
+/**
+ * проверка на авторизацию пользователя
+ * @param mysqli $db
+ * @return array|null
+ */
+function getUserData(mysqli $db): ?array {
+    if (!isset($_SESSION['user_id'])) {
+        return null;
+    }
+
+    $userId = (int) $_SESSION['user_id'];
+    $query = "SELECT id, name, email FROM users WHERE id = ?";
+    $stmt = dbGetPrepareStmt($db, $query, [$userId]);
+    if (!mysqli_stmt_execute($stmt)) {
+        return null;
+    }
+    $result = mysqli_stmt_get_result($stmt);
+    if ($result === false) {
+        return null;
+    }
+
+    $user = mysqli_fetch_assoc($result);
+
+    if (!$user) {
+        unset($_SESSION['user_id']);
+        return null;
+    }
+
+    return $user;
 }

@@ -6,6 +6,7 @@
 /** @var  $content */
 /** @var  $searchQuery */
 /** @var  $categoryId */
+/** @var  $pagination */
 
 $isLotPage = TRUE;
 

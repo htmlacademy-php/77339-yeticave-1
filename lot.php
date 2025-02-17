@@ -19,18 +19,11 @@ $lotPrices = calculateLotPrices($lot);
 $initialPrice = $lotPrices['current_price'];
 $minBet = $lotPrices['min_bet'];
 
-$isAuctionEnded = strtotime($lot['date_end']) < time();
 $isLotOwner = (int) $lot['author_id'] === $userId;
 $isLastBetByUser = lastBetUser($db, $lotId) === $userId;
 $errors = [];
 
-if ($isAuctionEnded) {
-    $winnerId = getWinner($db, $lotId);
-
-    if ($winnerId) {
-        updateWinnerID($db, $lotId, $winnerId);
-    }
-}
+handleEndedAuction($db, $lotId);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cost'])) {
 
@@ -44,7 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cost'])) {
     $lotPrices = calculateLotPrices($lot);
     $minBet = $lotPrices['min_bet'];
 
-    $error = validateBet($betValue, $minBet);
+    $lastBetUserId = lastBetUser($db, $lotId);
+
+        $error = validateBet($betValue, $minBet, $userId, $lastBetUserId);
 
     if ($error) {
         $errors['cost'] = $error;
@@ -68,7 +63,7 @@ $content = includeTemplate('lot.php', [
     'minBet' => $minBet,
     'errors' => $errors,
     'lotId' => $lotId,
-    'isAuctionEnded' => $isAuctionEnded,
+    'isAuctionEnded' => strtotime($lot['date_end']) < time(),
     'isLotOwner' => $isLotOwner,
     'isLastBetByUser' => $isLastBetByUser,
     'bets' => $bets,
@@ -81,6 +76,7 @@ $layoutContent = includeTemplate('layout.php', [
     'title' => $lotTitle,
     'userName' => $userName,
     'categories' => $categories,
+    'pagination' => '',
 ]);
 
 print($layoutContent);

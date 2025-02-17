@@ -340,44 +340,6 @@ function addBet(mysqli $db, int $userId, int $lotId, int $betValue): bool {
 }
 
 /**
- * получение ID победителя для лота
- * @param mysqli $db
- * @param int $lotId
- * @return int|null
- */
-
-function getWinner(mysqli $db, int $lotId): ?int
-{
-    $bets = getLotBets($db, $lotId);
-
-    if ($bets) {
-
-        return $bets[0]['user_id'];
-    }
-
-    return null;
-}
-
-/**
- * обновление столбца winner_id в таблице lots
- * @param mysqli $link
- * @param int $lotId
- * @param int $winnerId
- * @return bool
- */
-
-function updateWinnerID(mysqli $link, int $lotId, int $winnerId): bool
-{
-    $sql = "UPDATE lots SET winner_id = ? WHERE id = ?";
-    $data = [$winnerId, $lotId];
-    $stmt = dbGetPrepareStmt($link, $sql, $data);
-    $result = mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
-
-    return $result;
-}
-
-/**
  * получение максимальной ставки для лота
  * @param mysqli $db
  * @param int $lotId
@@ -393,4 +355,145 @@ function getMaxBet(mysqli $db, int $lotId): float
     $row = mysqli_fetch_assoc($result);
 
     return (float)($row['max_amount'] ?? 0);
+}
+
+/**
+ * рассчёт данных для пагинации
+ * @param mysqli $db
+ * @param int|null $categoryId
+ * @param int $pageItems
+ * @param int $curPage
+ */
+
+function getPaginationData(mysqli $db, ?int $categoryId, int $pageItems, int $curPage): array
+{
+    $offset = ($curPage - 1) * $pageItems;
+
+    $sqlCount = "SELECT COUNT(*) AS cnt FROM lots WHERE date_ens > NOW()";
+
+    if ($categoryId) {
+        $sqlCount .= " AND category_id = ?";
+        $stmt = mysqli_prepare($db, $sqlCount);
+        mysqli_stmt_bind_param($stmt, "i", $categoryId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+    } else {
+        $result = mysqli_query($db, $sqlCount);
+    }
+
+    $itemsCount = mysqli_fetch_assoc($result)['cnt'];
+    $pagesCount = (int) ceil($itemsCount / $pageItems);
+    $pages = range(1, $pagesCount);
+
+    $queryParams = $_GET;
+    $queryParams['page'] = max(1, $curPage - 1);
+    $prevPageUrl = "/?" . http_build_query($queryParams);
+
+    $queryParams['page'] = min($pagesCount, $curPage + 1);
+    $nextPageUrl = "/?" . http_build_query($queryParams);
+
+    return [
+        'offset' => $offset,
+        'pages' => $pages,
+        'pagesCount' => $pagesCount,
+        'prevPageUrl' => $prevPageUrl,
+        'nextPageUrl' => $nextPageUrl
+    ];
+}
+
+/**
+ * получение ID победителя для лота, основываясь на последней ставке
+ * @param mysqli $db
+ * @param int $lotId
+ * @return int|null
+ */
+
+function getWinnerIdFromBets(mysqli $db, int $lotId): ?int
+{
+    $rate = getLastLotBet($db, $lotId);
+
+    if ($rate) {
+        return $rate['user_id'];
+    }
+
+    return null;
+}
+
+/**
+ * получение последней ставки для указанного лота
+ * @param mysqli $db
+ * @param int $lotId
+ * @return array
+ */
+function getLastLotBet(mysqli $db, int $lotId): array {
+    $sql = "SELECT b.amount, b.user_id, u.name, b.date_create
+            FROM bets b
+            JOIN users u ON b.user_id = u.id
+            WHERE b.lot_id = ?
+            ORDER BY b.date_create DESC
+            LIMIT 1";
+
+    $stmt = dbGetPrepareStmt($db, $sql, [$lotId]);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    return mysqli_fetch_assoc($result);
+}
+
+/**
+ * получение лотов, у которых закончился срок и есть ставки, но нет победителя
+ * @param mysqli $db
+ * @return array
+ */
+
+function getLotsWithoutWinners(mysqli $db): array
+{
+    $sql = "SELECT l.id, l.title, b.user_id, u.email, u.name
+            FROM lots l
+            JOIN bets b ON l.id = b.lot_id
+            JOIN users u ON b.user_id = u.id
+            WHERE l.date_end <= NOW()
+              AND l.winner_id IS NULL
+            ORDER BY b.date_create DESC";
+
+    $result = mysqli_query($db, $sql);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+/**
+ * обновление winner_id в таблице lots
+ * @param mysqli $db
+ * @param int $lotId
+ * @param int $winnerId
+ * @return bool
+ */
+function updateLotWinner(mysqli $db, int $lotId, int $winnerId): bool
+{
+    $sql = "UPDATE lots SET winner_id = ? WHERE id = ?";
+    $data = [$winnerId, $lotId];
+    $stmt = dbGetPrepareStmt($db, $sql, $data);
+    $result = mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+
+    return $result;
+}
+
+/**
+ * получение ID пользователя, который сделал последнюю ставку по лоту
+ * @param mysqli $db
+ * @param int $lotId
+ * @return int|null
+ */
+function lastBetUser(mysqli $db, int $lotId): ?int
+{
+    $sql = "SELECT user_id FROM bets WHERE lot_id = ? ORDER BY date_create DESC LIMIT 1";
+    $stmt = dbGetPrepareStmt($db, $sql, [$lotId]);
+
+    if (mysqli_stmt_execute($stmt)) {
+        $result = mysqli_stmt_get_result($stmt);
+        $row = mysqli_fetch_assoc($result);
+        return $row['user_id'] ?? null;
+    }
+
+    return null;
 }

@@ -4,6 +4,7 @@ require_once 'data.php';
 
 /** @var mysqli $db */
 /** @var string $userName */
+/** @var array $categories */
 
 $categories = getCategories($db);
 $errors = [];
@@ -11,6 +12,7 @@ $formData = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $formData = $_POST;
+    var_dump($formData);
 
     $errors = validateSignUpForm($formData);
 
@@ -38,6 +40,7 @@ $layoutContent = includeTemplate('layout.php', [
     'title' => "Регистрация",
     'userName' => $userName,
     'categories' => $categories,
+    'pagination' => '',
 ]);
 
 print($layoutContent);
