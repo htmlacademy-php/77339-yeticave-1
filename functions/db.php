@@ -3,7 +3,7 @@
 /**
  * Рассчитывает данные для пагинации.
  *
- * @param mysqli $dbConnection Подключение к базе данных.
+ * @param mysqli $db Подключение к базе данных.
  * @param int|null $categoryId ID категории (null, если без категории).
  * @param int $pageItems Количество лотов на одной странице.
  * @param int $curPage Текущая страница.
@@ -21,20 +21,20 @@
  *   - prevPageUrl: ссылка на предыдущую страницу,
  *   - nextPageUrl: ссылка на следующую страницу.
  */
-function getPaginationData(mysqli $dbConnection, ?int $categoryId, int $pageItems, int $curPage): array
+function getPaginationData(mysqli $db, ?int $categoryId, int $pageItems, int $curPage): array
 {
     $offset = ($curPage - 1) * $pageItems;
 
-    $sqlCount = "SELECT COUNT(*) AS cnt FROM lots WHERE date_end > NOW()";
+    $sqlCount = "SELECT COUNT(*) AS cnt FROM lots WHERE ended_at > NOW()";
 
     if ($categoryId) {
         $sqlCount .= " AND category_id = ?";
-        $stmt = mysqli_prepare($dbConnection, $sqlCount);
+        $stmt = mysqli_prepare($db, $sqlCount);
         mysqli_stmt_bind_param($stmt, "i", $categoryId);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
     } else {
-        $result = mysqli_query($dbConnection, $sqlCount);
+        $result = mysqli_query($db, $sqlCount);
     }
 
     $itemsCount = mysqli_fetch_assoc($result)['cnt'];
@@ -60,14 +60,14 @@ function getPaginationData(mysqli $dbConnection, ?int $categoryId, int $pageItem
 /**
  * Получает ID победителя для лота, основываясь на последней ставке.
  *
- * @param mysqli $dbConnection Ресурс соединения с БД.
+ * @param mysqli $db Ресурс соединения с БД.
  * @param int $lotId ID лота.
  *
  * @return int|null ID пользователя, если ставка выиграла, иначе null.
  */
-function getWinnerIdFromBets(mysqli $dbConnection, int $lotId): ?int
+function getWinnerIdFromRates(mysqli $db, int $lotId): ?int
 {
-    $rate = getLastLotBet($dbConnection, $lotId);
+    $rate = getLastLotRate($db, $lotId);
 
     if ($rate) {
         return $rate['user_id'];
@@ -79,19 +79,19 @@ function getWinnerIdFromBets(mysqli $dbConnection, int $lotId): ?int
 /**
  * Получает последнюю ставку для указанного лота
  *
- * @param mysqli $dbConnection Подключение к базе данных
+ * @param mysqli $db Подключение к базе данных
  * @param int $lotId ID лота
  * @return array Массив последней ставки
  */
-function getLastLotBet(mysqli $dbConnection, int $lotId): array {
-    $sql = "SELECT b.amount, b.user_id, u.name, b.date_create
-            FROM bets b
-            JOIN users u ON b.user_id = u.id
-            WHERE b.lot_id = ?
-            ORDER BY b.date_create DESC
+function getLastLotRate(mysqli $db, int $lotId): array {
+    $sql = "SELECT r.amount, r.user_id, u.name, r.created_at
+            FROM rates r
+            JOIN users u ON r.user_id = u.id
+            WHERE r.lot_id = ?
+            ORDER BY r.created_at DESC
             LIMIT 1";
 
-    $stmt = dbGetPrepareStmt($dbConnection, $sql, [$lotId]);
+    $stmt = dbGetPrepareStmt($db, $sql, [$lotId]);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
@@ -103,13 +103,13 @@ function getLastLotBet(mysqli $dbConnection, int $lotId): array {
  */
 function getLotsWithoutWinners(mysqli $db): array
 {
-    $sql = "SELECT l.id, l.title, b.user_id, u.email, u.name
+    $sql = "SELECT l.id, l.title, r.user_id, u.email, u.name
             FROM lots l
-            JOIN bets b ON l.id = b.lot_id
-            JOIN users u ON b.user_id = u.id
-            WHERE l.date_end <= NOW()
+            JOIN rates r ON l.id = r.lot_id
+            JOIN users u ON r.user_id = u.id
+            WHERE l.ended_at <= NOW()
               AND l.winner_id IS NULL
-            ORDER BY b.date_create DESC";
+            ORDER BY r.created_at DESC";
 
     $result = mysqli_query($db, $sql);
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -144,7 +144,7 @@ function updateLotWinner(mysqli $db, int $lotId, int $winnerId): bool
  */
 function getMaxBetForLot(mysqli $db, int $lotId): float
 {
-    $sql = "SELECT MAX(amount) AS max_amount FROM bets WHERE lot_id = ?";
+    $sql = "SELECT MAX(amount) AS max_amount FROM rates WHERE lot_id = ?";
     $stmt = dbGetPrepareStmt($db, $sql, [$lotId]);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
@@ -160,31 +160,31 @@ function getMaxBetForLot(mysqli $db, int $lotId): float
  * @param int $userId ID пользователя.
  * @return array Массив ставок пользователя.
  */
-function getUserBets(mysqli $db, int $userId): array
+function getUserRates(mysqli $db, int $userId): array
 {
     $sql = "
         SELECT
-            b.id AS rate_id,
-            b.amount AS rate_amount,
-            b.date_create AS bet_created_at,
+            r.id AS rate_id,
+            r.amount AS rate_amount,
+            r.created_at AS rate_created_at,
             l.id AS lot_id,
             l.title AS lot_title,
-            l.img AS lot_image,
-            l.date_end AS lot_end_date,
+            l.image_url AS lot_image,
+            l.ended_at AS lot_end_date,
             c.name AS category_name,
             u.contacts AS winner_contacts
         FROM
-            bets b
+            rates r
         JOIN
-            lots l ON b.lot_id = l.id
+            lots l ON r.lot_id = l.id
         JOIN
             categories c ON l.category_id = c.id
         JOIN
             users u ON l.author_id = u.id
         WHERE
-            b.user_id = ?
+            r.user_id = ?
         ORDER BY
-            b.date_create DESC;
+            r.created_at DESC;
     ";
 
     $stmt = dbGetPrepareStmt($db, $sql, [$userId]);
@@ -201,12 +201,12 @@ function getUserBets(mysqli $db, int $userId): array
  * @param int $lotId ID лота
  * @return array Массив ставок
  */
-function getLotBets(mysqli $db, int $lotId): array {
-    $sql = "SELECT b.amount, b.user_id, u.name, b.date_create
-            FROM bets b
-            JOIN users u ON b.user_id = u.id
-            WHERE b.lot_id = ?
-            ORDER BY b.date_create DESC";
+function getLotRates(mysqli $db, int $lotId): array {
+    $sql = "SELECT r.amount, r.user_id, u.name, r.created_at
+            FROM rates r
+            JOIN users u ON r.user_id = u.id
+            WHERE r.lot_id = ?
+            ORDER BY r.created_at DESC";
 
     $stmt = dbGetPrepareStmt($db, $sql, [$lotId]);
     mysqli_stmt_execute($stmt);
@@ -224,8 +224,8 @@ function getLotBets(mysqli $db, int $lotId): array {
  * @param int $rateValue Сумма ставки
  * @return bool Успешность добавления
  */
-function addBet(mysqli $db, int $userId, int $lotId, int $rateValue): bool {
-    $sql = "INSERT INTO bets (user_id, lot_id, amount, date_create) VALUES (?, ?, ?, NOW())";
+function addRate(mysqli $db, int $userId, int $lotId, int $rateValue): bool {
+    $sql = "INSERT INTO rates (user_id, lot_id, amount, created_at) VALUES (?, ?, ?, NOW())";
     $stmt = dbGetPrepareStmt($db, $sql, [$userId, $lotId, $rateValue]);
 
     return mysqli_stmt_execute($stmt);
@@ -238,9 +238,9 @@ function addBet(mysqli $db, int $userId, int $lotId, int $rateValue): bool {
  * @param int $lotId ID лота.
  * @return int|null ID пользователя или null, если ставок нет.
  */
-function lastBetUser(mysqli $db, int $lotId): ?int
+function lastRateUser(mysqli $db, int $lotId): ?int
 {
-    $sql = "SELECT user_id FROM bets WHERE lot_id = ? ORDER BY date_create DESC LIMIT 1";
+    $sql = "SELECT user_id FROM rates WHERE lot_id = ? ORDER BY created_at DESC LIMIT 1";
     $stmt = dbGetPrepareStmt($db, $sql, [$lotId]);
 
     if (mysqli_stmt_execute($stmt)) {
@@ -267,7 +267,7 @@ function searchLots(mysqli $db, string $searchQuery): array
             FROM lots l
             JOIN categories c ON l.category_id = c.id
             WHERE MATCH(l.title, l.description) AGAINST(? IN NATURAL LANGUAGE MODE)
-                  AND l.date_end > NOW()";
+                  AND l.ended_at > NOW()";
 
     $stmt = dbGetPrepareStmt($db, $sql, [$searchQuery]);
     mysqli_stmt_execute($stmt);
@@ -278,11 +278,13 @@ function searchLots(mysqli $db, string $searchQuery): array
 
 /**
  * Ищет пользователя в базе данных по email.
+ *
  * @param string $email Email пользователя для поиска.
  * @param mysqli $db Объект подключения к базе данных.
+ *
  * @return array|null Ассоциативный массив с данными пользователя, если он найден, иначе null.
  */
-function findUser(string $email, mysqli $db): ?array
+function findUserByEmail(string $email, mysqli $db): ?array
 {
     $sql = "SELECT * FROM users WHERE email = ?";
     $stmt = dbGetPrepareStmt($db, $sql, [$email]);
@@ -297,16 +299,21 @@ function findUser(string $email, mysqli $db): ?array
  * @param array $config Настройки подключения
  * @return mysqli|bool Ресурс соединения
  */
-function connectDb(array $config): mysqli|bool
+function dbConnect(array $config): mysqli|bool
 {
-    $dbConfig = $config['db'];
-    $con = mysqli_connect($dbConfig['host'], $dbConfig['user'], $dbConfig['password'], $dbConfig['database']);
-
-    if ($con === false) {
-        exit("Ошибка подключения: " . mysqli_connect_error());
+    if (!isset($config['db']['host'], $config['db']['user'], $config['db']['password'], $config['db']['database'])) {
+        exit("Database configuration is incomplete.");
     }
 
-    mysqli_set_charset($con, 'utf8');
+    $dbConfig = $config['db'];
+
+    $con = mysqli_connect($dbConfig['host'], $dbConfig['user'], $dbConfig['password'], $dbConfig['database'], $dbConfig['port']);
+
+    if (!$con) {
+        exit("Connection error: " . mysqli_connect_error());
+    }
+
+    mysqli_set_charset($con, "utf8");
 
     return $con;
 }
@@ -322,13 +329,13 @@ function connectDb(array $config): mysqli|bool
 
 function getLots(mysqli $con, ?int $categoryId = null, int $limit = 9, int $offset = 0): array
 {
-    $sql = "SELECT l.id, l.title, l.initial_price, l.img, l.date_create, l.date_end, l.category_id,
+    $sql = "SELECT l.id, l.title, l.start_price, l.image_url, l.created_at, l.ended_at, l.category_id,
                    c.id as category_id, c.name AS category,
-                   COALESCE(MAX(b.amount), l.initial_price) AS current_price
+                   COALESCE(MAX(r.amount), l.start_price) AS current_price
             FROM lots l
             JOIN categories c ON c.id = l.category_id
-            LEFT JOIN bets b ON b.lot_id = l.id
-            WHERE l.date_end > NOW()";
+            LEFT JOIN rates r ON r.lot_id = l.id
+            WHERE l.ended_at > NOW()";
 
     $params = [];
     $types = "";
@@ -339,8 +346,8 @@ function getLots(mysqli $con, ?int $categoryId = null, int $limit = 9, int $offs
         $types .= "i";
     }
 
-    $sql .= " GROUP BY l.id, l.title, l.initial_price, l.img, c.name, l.date_end, l.date_create, l.category_id
-              ORDER BY l.date_end, l.date_create DESC
+    $sql .= " GROUP BY l.id, l.title, l.start_price, l.image_url, c.name, l.ended_at, l.created_at, l.category_id
+              ORDER BY l.ended_at, l.created_at DESC
               LIMIT ? OFFSET ?";
 
     $params[] = $limit;
@@ -414,7 +421,7 @@ function isCategoryExists(mysqli $con, int $categoryId): bool
  * @param mysqli $con ресурс соединения
  * @return array массив успех|id нового лота|ошибка
  */
-function addLot(array $lotData, mysqli $con): array
+function addLotToDb(array $lotData, mysqli $con): array
 {
     $response = [
         'success' => false,
@@ -422,7 +429,7 @@ function addLot(array $lotData, mysqli $con): array
         'error' => null
     ];
 
-    $sql = 'INSERT INTO lots (date_create, title, category_id, description, img, initial_price, bet_step, author_id, date_end)
+    $sql = 'INSERT INTO lots (created_at, title, category_id, description, image_url, start_price, rate_step, author_id, ended_at)
             VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?)';
 
     $stmt = dbGetPrepareStmt($con, $sql, $lotData);
@@ -456,13 +463,13 @@ function getLotById(mysqli $con, int $id): array|false|null
 
     $sql = "SELECT  l.*,
                     c.name AS category,
-                    b.amount AS last_rate,
-                    l.bet_step
+                    r.amount AS last_rate,
+                    l.rate_step
             FROM lots l
             JOIN categories c ON l.category_id = c.id
-            LEFT JOIN bets b ON l.id = b.lot_id
+            LEFT JOIN rates r ON l.id = r.lot_id
             WHERE l.id = $id
-            ORDER BY b.date_create DESC
+            ORDER BY r.created_at DESC
             LIMIT 1;";
 
     $result = mysqli_query($con, $sql);
@@ -483,7 +490,7 @@ function getLotById(mysqli $con, int $id): array|false|null
  * @param mysqli $db Объект подключения к базе данных
  * @return bool true, если пользователь успешно добавлен, иначе false
  */
-function addUser(array $formData, mysqli $db): bool
+function addUserToDatabase(array $formData, mysqli $db): bool
 {
     $passwordHash = password_hash($formData['password'], PASSWORD_DEFAULT);
     $sql = "INSERT INTO users (email, name, password, contacts) VALUES (?, ?, ?, ?)";

@@ -27,17 +27,17 @@ function timeAgo(string $date): string
 
 /**
  * Рассчитывает текущую цену лота и минимальную ставку
- * @param array $lot Данные лота (должны содержать 'last_rate', 'initial_price' и 'bet_step')
+ * @param array $lot Данные лота (должны содержать 'last_rate', 'start_price' и 'rate_step')
  * @return array Ассоциативный массив с 'current_price' и 'min_rate'
  */
 function calculateLotPrices(array $lot): array
 {
     if ($lot['last_rate'] !== null) {
         $currentPrice = $lot['last_rate'];
-        $minRate = $lot['last_rate'] + $lot['bet_step'];
+        $minRate = $lot['last_rate'] + $lot['rate_step'];
     } else {
-        $currentPrice = $lot['initial_price'];
-        $minRate = $lot['initial_price'] + $lot['bet_step'];
+        $currentPrice = $lot['start_price'];
+        $minRate = $lot['start_price'] + $lot['rate_step'];
     }
 
     return [

@@ -8,9 +8,9 @@ function handleEndedAuction(mysqli $db, int $lotId): void
     $lot = getLotById($db, $lotId);
 
     // Проверяем, завершен ли аукцион
-    $isAuctionEnded = strtotime($lot['date_end']) < time();
+    $isAuctionEnded = strtotime($lot['ended_at']) < time();
     if ($isAuctionEnded) {
-        $winnerId = getWinnerIdFromBets($db, $lotId);
+        $winnerId = getWinnerIdFromRates($db, $lotId);
 
         if ($winnerId) {
             updateLotWinner($db, $lotId, $winnerId);
@@ -27,7 +27,7 @@ function handleEndedAuction(mysqli $db, int $lotId): void
  * @param int $currentUserId
  * @return string|null Ошибка или null, если ставка корректна
  */
-function validateBet(mixed $rateValue, int $minRate, int $currentUserId, int|null $lastUserId = null): ?string {
+function validateRate(mixed $rateValue, int $minRate, int $currentUserId, int|null $lastUserId = null): ?string {
     if (empty($rateValue)) {
         return "Сделайте вашу ставку.";
     }
@@ -60,7 +60,7 @@ function validateBet(mixed $rateValue, int $minRate, int $currentUserId, int|nul
  *               - ['success' => true, 'user' => array] если аутентификация прошла успешно, где 'user' — массив с данными пользователя.
  */
 function authenticateUser(string $email, string $password, mysqli $db): array {
-    $user = findUser($email, $db);
+    $user = findUserByEmail($email, $db);
 
     if (!$user) {
         return ['errors' => ['email' => 'Пользователь с этим email не найден']];
@@ -96,17 +96,17 @@ function validateLoginForm(array $form): array {
  * Проверяет, авторизован ли пользователь и возвращает его данные.
  * Если пользователь был удален из базы, разлогинивает его.
  *
- * @param mysqli $db ресурс соединения
+ * @param mysqli $dbConnection ресурс соединения
  * @return array|null Массив с данными пользователя или null, если не авторизован.
  */
-function getUserData(mysqli $db): ?array {
+function getUserData(mysqli $dbConnection): ?array {
     if (!isset($_SESSION['user_id'])) {
         return null;
     }
 
     $userId = (int) $_SESSION['user_id'];
     $query = "SELECT id, name, email FROM users WHERE id = ?";
-    $stmt = dbGetPrepareStmt($db, $query, [$userId]);
+    $stmt = dbGetPrepareStmt($dbConnection, $query, [$userId]);
     if (!mysqli_stmt_execute($stmt)) {
         return null;
     }
@@ -161,13 +161,13 @@ function validateSignUpForm(array &$formData): array
  * Проверка уникальности e-mail
  *
  * @param string $email Адрес электронной почты
- * @param mysqli $dbConnection Объект подключения к базе данных
+ * @param mysqli $db Объект подключения к базе данных
  * @return bool true, если e-mail уникален, иначе false
  */
-function isEmailUnique(string $email, mysqli $dbConnection): bool
+function isEmailUnique(string $email, mysqli $db): bool
 {
     $query = "SELECT id FROM users WHERE email = ?";
-    $stmt = dbGetPrepareStmt($dbConnection, $query, [$email]);
+    $stmt = dbGetPrepareStmt($db, $query, [$email]);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
@@ -183,7 +183,7 @@ function isEmailUnique(string $email, mysqli $dbConnection): bool
 function validateEmailLength(string $name): ?string
 {
     if (mb_strlen($name) > 255) {
-        return "Email слишком длинный";
+        return "Длина email не должна превышать 255 символов.";
     }
     return null;
 }
@@ -197,7 +197,7 @@ function validateEmailLength(string $name): ?string
 function validateLotName(string $name): ?string
 {
     if (mb_strlen($name) > 255) {
-        return "Имя лота слишком длинное";
+        return "Длина имени лота не должна превышать 255 символов.";
     }
     return null;
 }

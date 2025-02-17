@@ -8,7 +8,7 @@ require_once 'data.php';
 /** @var array $categories */
 /** @var $pagination */
 
-$rates = getUserBets($db, $userId);
+$rates = getUserRates($db, $userId);
 
 $processedRates = [];
 foreach ($rates as $rate) {
@@ -36,7 +36,7 @@ foreach ($rates as $rate) {
 }
 
 $content = includeTemplate('my-bets.php', [
-    'bets' => $processedRates,
+    'rates' => $processedRates,
     'userName' => screening($userName),
 ]);
 

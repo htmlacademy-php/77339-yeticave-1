@@ -15,7 +15,7 @@ require_once 'functions/form.php';
 require_once 'functions/email.php';
 
 $config = require 'config.php';
-$db = connectDb($config);
+$db = dbConnect($config);
 $categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
 $categories = getCategories($db);
 
