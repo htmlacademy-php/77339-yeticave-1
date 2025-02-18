@@ -10,7 +10,7 @@ $lots = getLotsWithoutWinners($db);
 if (!empty($lots)) {
     foreach ($lots as $lot) {
         handleEndedAuction($db, $lot['id']);
-        $winnerId = getWinnerIdFromBets($db, $lot['id']);
+        $winnerId = getWinnerIdFromRates($db, $lot['id']);
         sendWinnerEmail([
             'email' => $lot['email'],
             'name' => $lot['name'],

@@ -7,20 +7,20 @@ require_once("data.php");
 /** @var array $categories */
 /** @var $pagination */
 
-$search = trim($_GET['search'] ?? '');
+$searchQuery = trim($_GET['search'] ?? '');
 
-if(empty($search)){
+if(empty($searchQuery)){
     header("Location: /");
     exit();
 }
 
-$lots = searchLots($db, $search);
+$lots = searchLots($db, $searchQuery);
 
 
 $content = includeTemplate("main.php", [
     'categories' => $categories,
     'lots' => $lots,
-    'searchQuery' => $search,
+    'searchQuery' => $searchQuery,
 ]);
 
 $layoutContent = includeTemplate('layout.php', [
@@ -28,7 +28,7 @@ $layoutContent = includeTemplate('layout.php', [
     'title' => "Поиск",
     'userName' => $userName,
     'categories' => $categories,
-    'searchQuery' => $search,
+    'searchQuery' => $searchQuery,
     'pagination' => $pagination,
 ]);
 

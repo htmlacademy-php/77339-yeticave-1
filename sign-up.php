@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        if (addUser($formData, $db)) {
+        if (addUserToDatabase($formData, $db)) {
             header('Location: login.php');
             exit;
         } else {
@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 
-$pageContent = includeTemplate('signup.php', [
+$pageContent = includeTemplate('sign-up.php', [
     'errors' => $errors,
     'formData' => $formData,
 ]);

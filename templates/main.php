@@ -8,8 +8,8 @@
 
 <section class="lots">
     <div class="lots__header"><?php
-    if (!empty($search)) : ?>
-            <h2>Результаты поиска по запросу «<span><?= screening($search) ?></span>»</h2>
+    if (!empty($searchQuery)) : ?>
+            <h2>Результаты поиска по запросу «<span><?= screening($searchQuery) ?></span>»</h2>
     <?php elseif (!empty($categoryId)) : ?>
             <h2>Все лоты в категории <span>«<?= $categoryName; ?>»</span></h2>
             <?php
@@ -30,7 +30,7 @@
             foreach ($lots as $lot) : ?>
                 <li class="lots__item lot">
                     <div class="lot__image">
-                        <img src="<?= screening($lot["img"]) ?>"
+                        <img src="<?= screening($lot["image_url"]) ?>"
                              width="350"
                              height="260"
                              alt="<?= $lot["title"] ?>">
@@ -48,8 +48,8 @@
                                 <span class="lot__cost"><?= screening(formatPrice($lot["start_price"])) ?></span>
                             </div>
                             <?php
-                            $hours = getTimeRemaining($lot["date_end"])[0];
-                            $minutes = getTimeRemaining($lot["date_end"])[1];
+                            $hours = getTimeRemaining($lot["ended_at"])[0];
+                            $minutes = getTimeRemaining($lot["ended_at"])[1];
 
                             $class = ($hours < 1) ? "timer--finishing" : '';
                             ?>

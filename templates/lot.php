@@ -23,7 +23,7 @@
     <div class="lot-item__content">
         <div class="lot-item__left">
             <div class="lot-item__image">
-                <img src="<?= screening($lot['img']) ?>" width="730" height="548" alt="Сноуборд">
+                <img src="<?= screening($lot['image_url']) ?>" width="730" height="548" alt="Сноуборд">
             </div>
             <p class="lot-item__category"> Категория: <span><?= $lot['category'] ?></span></p>
             <p class="lot-item__description"><?= screening($lot['description'])?></p>
@@ -67,7 +67,7 @@
                         <tr class="history__item">
                             <td class="history__name"><?= screening($rate['name']) ?></td>
                             <td class="history__price"><?= screening(formatPrice($rate['amount'])) ?></td>
-                            <td class="history__time"><?= timeAgo($rate['date_create']) ?></td>
+                            <td class="history__time"><?= timeAgo($rate['created_at']) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </table>

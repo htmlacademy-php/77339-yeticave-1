@@ -10,7 +10,7 @@ require_once 'data.php';
 $lotId = getLotId($db);
 $lot = getLotById($db, $lotId);
 
-$remainingTime = getTimeRemaining($lot["date_end"]);
+$remainingTime = getTimeRemaining($lot["ended_at"]);
 $hours = $remainingTime[0];
 $minutes = $remainingTime[1];
 $class = ($hours < 1) ? 'timer--finishing' : '';
@@ -20,7 +20,7 @@ $currentPrice = $lotPrices['current_price'];
 $minRate = $lotPrices['min_rate'];
 
 $isLotOwner = (int) $lot['author_id'] === $userId;
-$isLastRateByUser = lastBetUser($db, $lotId) === $userId;
+$isLastRateByUser = lastRateUser($db, $lotId) === $userId;
 $errors = [];
 
 handleEndedAuction($db, $lotId);
@@ -37,20 +37,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cost'])) {
     $lotPrices = calculateLotPrices($lot);
     $minRate = $lotPrices['min_rate'];
 
-    $lastRateUserId = lastBetUser($db, $lotId);
+    $lastRateUserId = lastRateUser($db, $lotId);
 
-    $error = validateBet($rateValue, $minRate, $userId, $lastRateUserId);
+    $error = validateRate($rateValue, $minRate, $userId, $lastRateUserId);
 
     if ($error) {
         $errors['cost'] = $error;
     } else {
-        addBet($db, $userId, $lotId, (int) $rateValue);
+        addRate($db, $userId, $lotId, (int) $rateValue);
         header("Location: lot.php?id=$lotId");
         exit();
     }
 }
 
-$rates = getLotBets($db, $lotId);
+$rates = getLotRates($db, $lotId);
 
 $content = includeTemplate('lot.php', [
     'categories' => $categories,
@@ -63,10 +63,10 @@ $content = includeTemplate('lot.php', [
     'minRate' => $minRate,
     'errors' => $errors,
     'lotId' => $lotId,
-    'isAuctionEnded' => strtotime($lot['date_end']) < time(),
+    'isAuctionEnded' => strtotime($lot['ended_at']) < time(),
     'isLotOwner' => $isLotOwner,
     'isLastRateByUser' => $isLastRateByUser,
-    'bets' => $rates,
+    'rates' => $rates,
 ]);
 
 $lotTitle = $lot['title'];
