@@ -285,6 +285,8 @@ function isDateValid(string $date): bool
  */
 function validateAddLotForm(array $postData, mysqli $db): array
 {
+    $errors = [];
+
     $errorMessages = [
         'lot-name' => 'Введите наименование лота',
         'category' => 'Выберите категорию',
@@ -310,35 +312,30 @@ function validateAddLotForm(array $postData, mysqli $db): array
         }
     ];
 
-    $required = ['lot-name', 'category', 'description', 'lot-img', 'lot-rate', 'lot-step', 'lot-date'];
-    $errors = [];
-
-    foreach ($required as $field) {
+    foreach ($errorMessages as $field => $message) {
         if (empty($postData[$field]) && $field !== 'lot-img') {
-            $errors[$field] = $errorMessages[$field];
-        }
-    }
-
-    foreach ($rules as $field => $rule) {
-        if (!empty($postData[$field]) && $rule($postData[$field])) {
-            $errors[$field] = $rule($postData[$field]);
+            $errors[$field] = $message;
+        } elseif (!empty($postData[$field]) && isset($rules[$field])) {
+            $error = $rules[$field]($postData[$field]);
+            if ($error) {
+                $errors[$field] = $error;
+            }
         }
     }
 
     if (empty($postData['category']) || $postData['category'] === 'Выберите категорию') {
         $errors['category'] = "Выберите категорию из списка";
     } else {
-        $categoryId = (int)$_POST['category'];
-
-        $categoryExistsQuery = "SELECT id FROM categories WHERE id = ?";
-        $stmt = dbGetPrepareStmt($db, $categoryExistsQuery, [$categoryId]);
+        $categoryId = (int)$postData['category'];
+        $stmt = dbGetPrepareStmt($db, "SELECT id FROM categories WHERE id = ?", [$categoryId]);
         mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-
-        if (mysqli_num_rows($result) === 0) {
+        if (mysqli_num_rows(mysqli_stmt_get_result($stmt)) === 0) {
             $errors['category'] = "Выбранная категория не существует";
         }
     }
+
+    return $errors;
+}
 
     return $errors;
 }
